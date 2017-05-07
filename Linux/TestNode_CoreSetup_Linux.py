@@ -140,6 +140,11 @@ def Installer_With_Pip():
     except:
         print "unable to install/update %s" % module_name
 
+    try:
+        install(type="apt-get", module_name="pythonmagick")
+    except:
+        print "unable to install/update %s" % module_name
+
 """
 # Check and install django
     django_version = "1.8.2"

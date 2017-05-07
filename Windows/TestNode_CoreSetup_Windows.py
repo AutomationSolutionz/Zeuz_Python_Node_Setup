@@ -157,7 +157,8 @@ def Easy_Installer():
         print "skipping psycopg2 install as its not needed"
         #psycopg2_easy_install = "easy_install http://www.stickpeople.com/projects/python/win-psycopg/2.6.0/psycopg2-2.6.0.win32-py2.7-pg9.4.1-release.exe"
         #install(cmd=psycopg2_easy_install)
-        print "skipping wx install .."
+        # print "skipping wx install .."
+        install(type="pip", module_name="wx")
         #wx_install = "pip install --upgrade --trusted-host wxpython.org --pre -f http://wxpython.org/Phoenix/snapshot-builds/ wxPython_Phoenix"
         #install(cmd=wx_install)
     except:

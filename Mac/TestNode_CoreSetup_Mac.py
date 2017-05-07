@@ -1,154 +1,76 @@
 # Copyright 2015, Automation Solutionz
 # ---
-
-import subprocess
 import os
 import sys
-import commands
 
-install_str = "sudo pip install -U pip"
-apt_get_str = "sudo apt-get install"
+import getpass 
+
+
+
+def check_if_ran_with_sudo():
+    global sudo_pass
+    sudo_pass = None
+    if os.getuid() == 0:
+        return True
+    else:
+        max_try = 3
+        counter=0
+        have_pass = False
+        while counter != max_try:
+            print "This program needs sudo access.  please provide sudo password"
+            passwd = getpass.getpass()
+            print "checking to see if you have entered correct sudo"
+            command = "echo 'sudo check'"
+            p = os.system('echo %s|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
+            if p == 256:
+                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                counter = counter+1
+            else:
+                print "sudo authentication verified!"
+                have_pass = True
+                break    
+        if have_pass == False:
+            return False
+        else:   
+            sudo_pass = passwd
+            return True
 
 
 # Installation function
 def install(type = "", module_name = "", module_version = None, cmd = ""):
     command = ""
+    install_str = "echo %s|sudo -S /usr/local/bin/pip install -U " %sudo_pass
+    apt_get_str = "echo %s|sudo -S /usr/local/bin/brew install"
     
     if type == "pip":
         command = "%s %s" % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
-    elif type == "apt-get":
+    elif type == "brew":
         command = "%s %s --yes" % (apt_get_str, module_name)
     else:
         command = cmd
     print "Installing: %s " %command
-    status, output = commands.getstatusoutput(command)
+    output = os.system(command)
     print output
     print (78 * '-')
 
+def Installer_With_Brew():
+
+    brew_module_list = ["wget", "duplicity","wxmac"]
+    for each in brew_module_list:
+        try:
+            install(cmd="brew install %s"%each)
+        except:
+            print "Unable to install %s"%each
+
 def Installer_With_Pip():
-        # Check and install appscript
-    try:
-        install(type="pip", module_name="appscript")
-    except:
-        print "unable to install/update %s"%module_name  
-
-   
-    
-    
-    # install pip
-    try:
-        install(cmd="sudo easy_install pip")
-    except:
-        print "Unable to install pip"
-        
-    # Check and install simplejson
-    try:
-        import simplejson
-    except ImportError as e:
-        install(type="pip", module_name="simplejson")
-
-    # Check and install urllib3
-    try:
-        install(type="pip", module_name="urllib3")
-    except:
-        print "unable to install/update %s"%module_name  
-    
-    """
-    # Check and install django
-    django_version = "1.8.2"
-    try:
-        install(type="pip", module_name="django", module_version=django_version)
-    except:
-        print "unable to install/update %s"%module_name  
-            
-    # Check and install django-celery    
-    try:
-        install(type="pip", module_name="django-celery")
-    except:
-        print "unable to install/update %s"%module_name  
-    """
-    
-    # Check and install selenium
-    try:
-        install(type="pip", module_name="selenium")
-    except:
-        print "unable to install/update %s"%module_name  
-        
-    # Check and install requests
-    try:
-        install(type="pip", module_name="requests")
-    except:
-        print "unable to install/update %s"%module_name  
-        
-    # Check and install six
-    try:
-        install(type="pip", module_name="six")
-    except:
-        print "unable to install/update %s"%module_name  
-    
-    # Check and install poster
-    try:
-        install(type="pip", module_name="poster")
-    except:
-        print "unable to install/update %s"%module_name  
-	
-	# Check and install wheel
-    try:
-        install(type="pip", module_name="wheel")
-    except:
-        print "unable to install/update %s"%module_name
-
-	# Check and install python-dateutil
-    try:
-        install(type="pip", module_name="python-dateutil")
-    except:
-        print "unable to install/update %s"%module_name
-
-	# Check and install dropbox
-    try:
-        install(type="pip", module_name="dropbox")
-    except:
-        print "unable to install/update %s"%module_name
-
-    try:
-        install(type="pip", module_name="python3-xlib")
-    except:
-        print "unable to install/update %s"%module_name
-
-    try:
-        install(type="pip", module_name="pyautogui")
-    except:
-        print "unable to install/update %s"%module_name
-
-    try:
-        install(type="pip", module_name="Appium-Python-Client")
-    except:
-        print "unable to install/update %s"%module_name
-		
-    try:
-        install(type="pip", module_name="lxml")
-    except:
-        print "unable to install/update %s"%module_name
-
-    try:
-        install(type="pip", module_name="gi")
-    except:
-        print "unable to install/update gi"
-
-    # brew
-    try:
-        install(cmd='/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-    except:
-        print "Unable to install brew"
-
-    # duplicity
-    try:
-        install(cmd="brew install duplicity")
-    except:
-        print "Unable to install duplicity"
-
+    pip_module_list = ["psutil", "pyserial", "twisted", "numpy","imutils","appscript", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python-dateutil","python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi"]
+    for each in pip_module_list:
+        try:
+            install(type="pip", module_name=each)
+        except:
+            print "unable to install/update %s"%each
 
 def Install_Chrome_Drivers():
     import urllib3
@@ -157,23 +79,22 @@ def Install_Chrome_Drivers():
         print "Getting latest version of chrome driver"
         r = http.request('GET', 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
         latest_version = r.data.split('\n')[0]
-        print "latest version is: %s"%latest_version
+        print "latest version is: %s" % latest_version
     except:
         print "Unable to get the latest version."
         return
-    download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_linux64.zip')%latest_version
-    print "Downloading latest Chrome driver from: %s" %download_link
-    install(type = "apt-get", module_name = "unzip")
-    install(cmd = "wget -N " + download_link)
-    install(cmd = "unzip chromedriver_linux64.zip")
-    install(cmd = "chmod +x chromedriver")
-    install(cmd = "sudo mv -f chromedriver /usr/local/share/chromedriver")
-    install(cmd = "sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver")
-    install(cmd = "sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver")
+    download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_linux64.zip') % latest_version
+    print "Downloading latest Chrome driver from: %s" % download_link
+    install(cmd="/usr/local/bin/wget -N " + download_link)
+    install(cmd="unzip chromedriver_linux64.zip")
+    install(cmd="chmod +x chromedriver")
+    install(cmd="sudo mv -f chromedriver /usr/local/share/chromedriver")
+    install(cmd="sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver")
+    install(cmd="sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver")
 
 
 def Install_Firefox_Drivers():
-
+    Install_Chrome_Browser()
     import urllib3
     http = urllib3.PoolManager()
     import re
@@ -196,7 +117,7 @@ def Install_Firefox_Drivers():
     latest_version, latest_version)
     download_link = str(download_link)
     print "Downloading latest 64bit geckodriver from: %s" % download_link
-    install(cmd="wget -N " + download_link)
+    install(cmd="/usr/local/bin/wget -N " + download_link)
     geckodriver_cmd = ('tar -xvzf geckodriver-%s-macos.tar.gz') % (latest_version)
     geckodriver_cmd = str(geckodriver_cmd)
     install(cmd=geckodriver_cmd)
@@ -218,87 +139,45 @@ class Logger(object):
     def close(self):
         self.log.close()
 
-def main():
-    sys.stdout = Logger()
-
-## Print Linux Version
-    print (78 * '-')
-    print ('Linux Version')
-    print (78 * '-')
-    command = "lsb_release -a"
-    status, output = commands.getstatusoutput(command)
-    print output
-
-## Install PIP
-    print (78 * '-')
-    print ('Python PIP Installation')
-    print (78 * '-')
-    os.system("sudo add-apt-repository universe")
-    os.system("sudo apt-get update --yes")
-    install(type = "apt-get", module_name = "python-pip")
-
-## Install PIP modules    
-    Installer_With_Pip()
-
-## Install Postgres
-    print (78 * '-')
-    print ('Postgres Installation')
-    print (78 * '-')
-    install(type = "apt-get", module_name = "libpq-dev python-dev")
-    install(type = "apt-get", module_name = "postgresql postgresql-contrib")
-
-    
-## Check and install psycopg2
-    print (78 * '-')
-    print ('Install Psycopg2')
-    print (78 * '-')
-    try:
-        import psycopg2
-    except ImportError as e:
-        install(type="apt-get", module_name="python-psycopg2")
-    
-
-## Easy install funkload
-    try:
-        import funkload
-    except ImportError as e:
-        try:
-            funkload_easy_install = "sudo easy_install https://github.com/nuxeo/FunkLoad/archive/master.zip"
-            install(cmd=funkload_easy_install)
-        except:
-            print "unable to install/update funkload"
-
-## Install Chrome
+def Install_Chrome_Browser():
+    ## Install Chrome
     print (78 * '-')
     print ('Chrome Installation')
     print (78 * '-')
-    install(type = "apt-get", module_name = "libxss1 libappindicator1 libindicator7")
-    install(cmd = "wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+    install(type = "brew", module_name = "libxss1 libappindicator1 libindicator7")
+    install(cmd = "/usr/local/bin/wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
     install(cmd = "sudo dpkg -i google-chrome*.deb")
-    install(cmd = "sudo apt-get install -f")
-
-## Install Chrome Drivers
-    print (78 * '-')
-    print ('Chrome Drivers Installation')
-    print (78 * '-')
-    Install_Chrome_Drivers()
+    install(cmd = "sudo brew install -f")
 
 
-
-## Install Firefox Drivers
-    print (78 * '-')
-    print ('Firefox Drivers Installation')
-    print (78 * '-')
-    Install_Firefox_Drivers()
-
-    # Check and install psutil
+def Install_Brew():
+        # brew Need to implement if brew is already implemented 
     try:
-        install(type="pip", module_name="psutil")
+        brew_string ='/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+        
+        cmd = "echo %s|sudo -S %s " %(sudo_pass,brew_string)
+        print os.system(cmd)
+        print "Successfully installed brew"
     except:
-        print "unable to install/update %s"%module_name  
+        print "Unable to install brew.  Please install brew manually"
+        return False
 
-
+def main():
+    # Make sure we have root privleges
+    if check_if_ran_with_sudo():
+        print "Running with root privs"
+    else:
+        print "Error. Need root privleges."
+        quit()
+    sys.stdout = Logger()
+    Install_Brew()
+    Installer_With_Brew()
+    Installer_With_Pip()
+    Install_Chrome_Drivers()
+    Install_Firefox_Drivers()
     sys.stdout.close()
 
 if __name__=="__main__":
-	main()
+    main()
+
+
