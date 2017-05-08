@@ -2,7 +2,6 @@
 # ---
 import os
 import sys
-
 import getpass 
 
 
@@ -65,7 +64,7 @@ def Installer_With_Brew():
             print "Unable to install %s"%each
 
 def Installer_With_Pip():
-    pip_module_list = ["psutil", "pyserial", "twisted", "numpy","imutils","appscript", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python-dateutil","python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi"]
+    pip_module_list = ["psutil", "pyserial", "twisted", "numpy","imutils","appscript", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python-dateutil","python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
     for each in pip_module_list:
         try:
             install(type="pip", module_name=each)

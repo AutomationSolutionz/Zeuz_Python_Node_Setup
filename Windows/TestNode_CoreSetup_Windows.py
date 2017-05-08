@@ -8,7 +8,6 @@ import sys
 import platform
 import commands
 from subprocess import PIPE, Popen
-#from wx.tools.Editra.src.extern.pygments.formatters._mapping import module_name
 
 
 install_str = "python -m pip install -U"
@@ -94,32 +93,25 @@ def Installer_With_Pip():
         install(type="pip", module_name="poster")
     except:
         print "unable to install/update %s"%module_name  
-	
-	# Check and install wheel
+
+    # Check and install wheel
     try:
         module_name="wheel"
         install(type="pip", module_name="wheel")
     except:
         print "unable to install/update %s"%module_name
 
-	# Check and install python-dateutil
+    # Check and install python-dateutil
     try:
         module_name="python-dateutil"
         install(type="pip", module_name="python-dateutil")
     except:
         print "unable to install/update %s"%module_name
 
-	# Check and install dropbox
+    # Check and install dropbox
     try:
         module_name="dropbox"
         install(type="pip", module_name="dropbox")
-    except:
-        print "unable to install/update %s"%module_name
-		
-	# Check and install Appium-Python-Client
-    try:
-        module_name="Appium-Python-Client"
-        install(type="pip", module_name="Appium-Python-Client")
     except:
         print "unable to install/update %s"%module_name
     
@@ -143,7 +135,7 @@ def Installer_With_Pip():
         install(type="pip", module_name="pywinauto")
     except:
         print "unable to install/update %s"%module_name		
-	# Check and install lxml
+    # Check and install lxml
 '''
     try:
         module_name="lxml"
@@ -192,18 +184,18 @@ def Easy_Installer():
             install(cmd=psutil_easy_install)
         except:
             print "unable to install/update psutil"
-	
+
 def Installer_With_Exe():
     
     # Check and install psycopg2
-    try:
+    '''try:
         print "removing psycopg2"
         #psycopg2_easy_install = "easy_install http://www.stickpeople.com/projects/python/win-psycopg/2.6.0/psycopg2-2.6.0.win32-py2.7-pg9.4.1-release.exe"
        # install(cmd=psycopg2_easy_install)
     except:
-        print "unable to install/update psycopg2"
+        print "unable to install/update psycopg2"'''
     
-	    
+
     # Check and install win32api
     try:
         import win32api
@@ -250,7 +242,7 @@ def Installer_With_Exe():
         
     
 
-	
+
 def Selenium_Driver_Files_Windows():
     Chrom_Driver_Download()
     Ie_Driver_Download()
@@ -379,22 +371,22 @@ def unzip(zipFilePath, destDir):
     zfile.close()
 
 def Check_Pre_Req():
-	if os.name != 'nt':
-		print "System is not Windows"
-		sys.exit(0)
-	if sys.version_info[:2] != (2,7):
-		print "Python version is not 2.7"
-		sys.exit(0)
-	if platform.architecture()[0] != '32bit':
-		print "Python is not 32 bit"
-		sys.exit(0)
-	if 'setuptools' not in cmdline("easy_install --version"):
-		print "easy_install is not installed"
-		sys.exit(0)
-	if 'pip' not in cmdline("pip --version"):
-		print "pip is not installed"
-		sys.exit(0)
-	print "Prereq verified successfully"
+    if os.name != 'nt':
+        print "System is not Windows"
+        sys.exit(0)
+    if sys.version_info[:2] != (2,7):
+        print "Python version is not 2.7"
+        sys.exit(0)
+    if platform.architecture()[0] != '32bit':
+        print "Python is not 32 bit"
+        sys.exit(0)
+    if 'setuptools' not in cmdline("easy_install --version"):
+        print "easy_install is not installed"
+        sys.exit(0)
+    if 'pip' not in cmdline("pip --version"):
+        print "pip is not installed"
+        sys.exit(0)
+    print "Prereq verified successfully"
 
 class Logger(object):
     def __init__(self):
@@ -418,6 +410,6 @@ def main():
     Easy_Installer()
 
     sys.stdout.close()
-	
+
 if __name__=="__main__":
-	main()
+    main()

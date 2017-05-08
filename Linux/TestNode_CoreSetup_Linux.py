@@ -10,7 +10,6 @@ import getpass # For check_if_ran_with_sudo()
 install_str = "sudo pip install -U pip"
 apt_get_str = "sudo apt-get install"
 
-
 # Installation function
 def install(type="", module_name="", module_version=None, cmd=""):
     command = ""
@@ -28,140 +27,36 @@ def install(type="", module_name="", module_version=None, cmd=""):
     print output
     print (78 * '-')
 
+def Installer_With_Apt_get():
+    
+    apt_get_module_list = ["python-qt4", "python-qt4","duplicity","python-wxgtk2.8"]
+    for each in apt_get_module_list:
+        try:
+            install(type="apt-get", module_name=each)
+        except:
+            print "unable to install/update %s" % each
+
 
 def Installer_With_Pip():
-    # Check and install simplejson
-    try:
-        import simplejson
-    except ImportError as e:
-        install(type="pip", module_name="simplejson")
+    pip_module_list = ["psutil", "pyserial", "twisted", "numpy","imutils","appscript", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python-dateutil","python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
+    for each in pip_module_list:
+        try:
+            install(type="pip", module_name=each)
+        except:
+            print "unable to install/update %s"%each
 
-    # Check and install urllib3
-    try:
-        install(type="pip", module_name="urllib3")
-    except:
-        print "unable to install/update %s" % module_name
-
-
-        # Check and install selenium
-    try:
-        install(type="pip", module_name="selenium")
-    except:
-        print "unable to install/update %s" % module_name
-
-        # Check and install requests
-    try:
-        install(type="pip", module_name="requests")
-    except:
-        print "unable to install/update %s" % module_name
-
-        # Check and install six
-    try:
-        install(type="pip", module_name="six")
-    except:
-        print "unable to install/update %s" % module_name
-
-        # Check and install poster
-    try:
-        install(type="pip", module_name="poster")
-    except:
-        print "unable to install/update %s" % module_name
-
-    # Check and install wheel
-    try:
-        install(type="pip", module_name="wheel")
-    except:
-        print "unable to install/update %s" % module_name
-
-    # Check and install python-dateutil
-    try:
-        install(type="pip", module_name="python-dateutil")
-    except:
-        print "unable to install/update %s" % module_name
-
-    # Check and install dropbox
-    try:
-        install(type="pip", module_name="dropbox")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="pip", module_name="python3-xlib")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="pip", module_name="pyautogui")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="pip", module_name="Appium-Python-Client")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="pip", module_name="lxml")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="apt-get", module_name="python-wxgtk2.8")
-    except:
-        print "unable to install/update %s" % module_name
-    # needed for desktop automation
-    try:
-        install(type="pip", module_name="numpy")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="pip", module_name="imutils")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="pip", module_name="xlrd")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="apt-get", module_name="duplicity")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="apt-get", module_name="python-twisted")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="apt-get", module_name="python-serial")
-    except:
-        print "unable to install/update %s" % module_name
-
-    try:
-        install(type="apt-get", module_name="pythonmagick")
-    except:
-        print "unable to install/update %s" % module_name
-
-"""
-# Check and install django
-    django_version = "1.8.2"
-    try:
-        install(type="pip", module_name="django", module_version=django_version)
-    except:
-        print "unable to install/update %s"%module_name
-
-    # Check and install django-celery
-    try:
-        install(type="pip", module_name="django-celery")
-    except:
-        print "unable to install/update %s"%module_name
-"""
 
 
 def Install_Chrome_Drivers():
+    ## Install Chrome
+    print (78 * '-')
+    print ('Chrome Installation')
+    print (78 * '-')
+    install(type="apt-get", module_name="libxss1 libappindicator1 libindicator7")
+    install(cmd="wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+    install(cmd="sudo dpkg -i google-chrome*.deb")
+    install(cmd="sudo apt-get install -f")
+    
     import urllib3
     http = urllib3.PoolManager()
     try:
@@ -183,11 +78,9 @@ def Install_Chrome_Drivers():
     install(cmd="sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver")
 
 def Install_Firefox_Drivers():
-
     import urllib3
     http = urllib3.PoolManager()
     import re
-
     try:
         print "Getting latest version of firefox driver"
         r = http.request('GET', 'https://github.com/mozilla/geckodriver/releases/latest')
@@ -214,6 +107,34 @@ def Install_Firefox_Drivers():
     install(cmd="sudo mv -f geckodriver /usr/local/share/geckodriver")
     install(cmd="sudo ln -s /usr/local/share/geckodriver /usr/local/bin/geckodriver")
     install(cmd="sudo ln -s /usr/local/share/geckodriver /usr/bin/geckodriver")
+
+def Install_PIP():
+     # we should not have to do this ...
+    print (78 * '-')
+    print ('Python PIP Installation')
+    print (78 * '-')
+    os.system("sudo add-apt-repository universe")
+    os.system("sudo apt-get update --yes")
+    install(type="apt-get", module_name="python-pip")
+
+def Install_OpenCV():
+    print (78 * '-')
+    print ('Install OpenCV')
+    print (78 * '-')
+    try:
+        os.system("sudo chmod 777 ../backupDriverFiles/Desktop/opencv.sh")
+        os.system("./../backupDriverFiles/Desktop/opencv.sh")
+        os.system("sudo apt-get install python-opencv")
+    except:
+        print "unable to install/update OpenCV"
+
+def OS_Version():
+    print (78 * '-')
+    print ('Linux Version')
+    print (78 * '-')
+    command = "lsb_release -a"
+    status, output = commands.getstatusoutput(command)
+    print output
 
 class Logger(object):
     def __init__(self):
@@ -262,109 +183,12 @@ def main():
     else:
         print "Error. Need root privleges."
         quit()
-
-    # Start logger
     sys.stdout = Logger()
-    
-    ## Print Linux Version
-    print (78 * '-')
-    print ('Linux Version')
-    print (78 * '-')
-    command = "lsb_release -a"
-    status, output = commands.getstatusoutput(command)
-    print output
-
-    try:
-        import Tkinter
-    except:
-        install(type="apt-get", module_name="python-tk")
-
-    ## Install PIP
-    print (78 * '-')
-    print ('Python PIP Installation')
-    print (78 * '-')
-    os.system("sudo add-apt-repository universe")
-    os.system("sudo apt-get update --yes")
-    install(type="apt-get", module_name="python-pip")
-
-    ## Install PIP modules
+    OS_Version()
     Installer_With_Pip()
-
-    ## Install Postgres
-    print (78 * '-')
-    print ('Postgres Installation')
-    print (78 * '-')
-    install(type="apt-get", module_name="libpq-dev python-dev")
-    install(type="apt-get", module_name="postgresql postgresql-contrib")
-
-    ## Easy install funkload
-    try:
-        import funkload
-    except ImportError as e:
-        try:
-            funkload_easy_install = "sudo easy_install https://github.com/nuxeo/FunkLoad/archive/master.zip"
-            install(cmd=funkload_easy_install)
-        except:
-            print "unable to install/update funkload"
-
-            ## Install Chrome
-    print (78 * '-')
-    print ('Chrome Installation')
-    print (78 * '-')
-    install(type="apt-get", module_name="libxss1 libappindicator1 libindicator7")
-    install(cmd="wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-    install(cmd="sudo dpkg -i google-chrome*.deb")
-    install(cmd="sudo apt-get install -f")
-
-    ## Install Chrome Drivers
-    print (78 * '-')
-    print ('Chrome Drivers Installation')
-    print (78 * '-')
     Install_Chrome_Drivers()
-
-    ## Install Firefox Drivers
-    print (78 * '-')
-    print ('Firefox Drivers Installation')
-    print (78 * '-')
     Install_Firefox_Drivers()
-
-    # Check and install psutil
-    try:
-        install(type="pip", module_name="psutil")
-    except:
-        print "unable to install/update %s" % module_name
-
-
-    ## Check and install psycopg2
-    print (78 * '-')
-    print ('Install Psycopg2')
-    print (78 * '-')
-    try:
-        import psycopg2
-    except ImportError as e:
-        install(type="apt-get", module_name="python-psycopg2")
-
-    ##Install OpenCV
-    print (78 * '-')
-    print ('Install OpenCV')
-    print (78 * '-')
-    try:
-        os.system("sudo chmod 777 ../backupDriverFiles/Desktop/opencv.sh")
-        os.system("./../backupDriverFiles/Desktop/opencv.sh")
-        os.system("sudo apt-get install python-opencv")
-    except:
-        print "unable to install/update OpenCV"
-
-    ## Check and install pyQt4
-    print (78 * '-')
-    print ('Install PyQt4')
-    print (78 * '-')
-    try:
-        import PyQt4
-    except ImportError as e:
-        install(type="apt-get", module_name="python-qt4")
-
-
+    Install_OpenCV() 
     sys.stdout.close()
 
 

@@ -29,6 +29,7 @@ def Installer_With_Pip():
         print "unable to install/update SpeechRecognition"
         
     try:
+        module_name = "Appium-Python-Client"
         install(type="pip", module_name="Appium-Python-Client")
     except:
         print "unable to install/update %s"%module_name
@@ -82,21 +83,26 @@ def Install_Appium():
     maven_path=os.getcwd()+os.sep+'backupDriverFiles'+os.sep+'Android'+os.sep+'apache-maven-3.3.3-bin.zip'
     unzip(maven_path,'C:\Python27\Lib\site-packages')
     os.environ['PATH']+='C:\Python27\Lib\site-packages\apache-maven-3.3.3\bin;'
+    print "installing node and npm"
     os.system(os.getcwd().replace('\\','/')+'/backupDriverFiles/Android/appium.bat')
+    install(cmd="npm install -g node_gyp")
+    print "installing appium 1.6.3"
+    install(cmd="npm install -g appium@1.6.3")
+    print "appium 1.6.3 installed successfully"
+
 
 def Install_Android_SDK():
     import webbrowser
-    webbrowser.open_new('http://developer.android.com/sdk/index.html')
+    webbrowser.open_new('http://filehippo.com/download_android_sdk/')
     raw_input('Press Any Key when Android SDK installed')
 
-    if os.path.isdir(os.environ["LocalAppData"]+'\\Android\\sdk'):        
-        os.environ['ANDROID_HOME'] = os.environ["LocalAppData"]+'\\Android\\sdk'
-        os.environ['ADT_HOME'] = os.environ["LocalAppData"]+'\\Android\\sdk'
+    if os.path.isdir(os.environ["PROGRAMFILES"]+'\\Android\\android-sdk'):
+        os.environ['ANDROID_HOME'] = os.environ["LocalAppData"]+'\\Android\\android-sdk'
+        os.environ['ADT_HOME'] = os.environ["LocalAppData"]+'\\Android\\android-sdk'
         os.environ['PATH']+='%ANDROID_HOME%\tools;%ANDROID_HOME%\platform-tools'
         print "----------------------------------"
         print "Android SDK installed successfully"
         print "----------------------------------"
-
     else:
         print "-------------------------"
         print "Android SDK not installed"
@@ -108,15 +114,17 @@ def Install_Java_JDK():
     import glob
     webbrowser.open_new('http://www.oracle.com/technetwork/java/javase/downloads/index.html')
     raw_input('Press Any Key when Java JDK installed')
-    
+
+    installed = False
     for name in glob.glob(os.environ["ProgramFiles"]+'\\Java\\jdk*'):
         os.environ['JAVA_HOME'] = name
         os.environ['PATH']+='%JAVA_HOME%;%JAVA_HOME%\bin'
         print "----------------------------------"
         print "JAVA JDK installed successfully"
         print "----------------------------------"
+        installed = True
 
-    else:
+    if not installed:
         print "-------------------------"
         print "JAVA JDK not installed"
         print "-------------------------"
