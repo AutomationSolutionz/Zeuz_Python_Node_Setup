@@ -32,15 +32,17 @@ def Installer_With_Apt_get():
     apt_get_module_list = ["python-qt4", "python-qt4","duplicity","python-wxgtk2.8"]
     for each in apt_get_module_list:
         try:
+            print "Installing %s module"%each
             install(type="apt-get", module_name=each)
         except:
             print "unable to install/update %s" % each
 
 
 def Installer_With_Pip():
-    pip_module_list = ["psutil", "pyserial", "twisted", "numpy","imutils","appscript", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python-dateutil","python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
+    pip_module_list = ["pip", "psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" ,"python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
     for each in pip_module_list:
         try:
+            print "Installing %s module"%each
             install(type="pip", module_name=each)
         except:
             print "unable to install/update %s"%each
@@ -48,7 +50,8 @@ def Installer_With_Pip():
 
 
 def Install_Chrome_Drivers():
-    ## Install Chrome
+    ## Install Chrome 
+    # ** Improvement needed:  we need to make sure we check if chrome is already installed or not
     print (78 * '-')
     print ('Chrome Installation')
     print (78 * '-')

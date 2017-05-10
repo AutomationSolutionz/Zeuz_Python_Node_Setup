@@ -6,11 +6,18 @@ import getpass
 
 
 
-def check_if_ran_with_sudo():
+def check_if_ran_with_sudo(expect):
+    ''' if we expect TRUE that means we want to make sure SUDO password was given.  If expect = FALSE that means we expect not to get sudo'''
     global sudo_pass
     sudo_pass = None
-    if os.getuid() == 0:
+    if os.getuid() == 0 and expect == True:
         return True
+    elif os.getuid() == 0 and expect == False:
+        return False
+  
+    elif os.getuid() != 0 and expect == False:
+        return True
+    
     else:
         max_try = 3
         counter=0
@@ -38,15 +45,16 @@ def check_if_ran_with_sudo():
 # Installation function
 def install(type = "", module_name = "", module_version = None, cmd = ""):
     command = ""
-    install_str = "echo %s|sudo -S /usr/local/bin/pip install -U " %sudo_pass
-    apt_get_str = "echo %s|sudo -S /usr/local/bin/brew install"
+    #install_str = "echo %s|sudo -S /usr/local/bin/pip install -U " %sudo_pass
+    install_str = "/usr/local/bin/pip install --user -U "
+    brew_str = "/usr/local/bin/brew install"
     
     if type == "pip":
         command = "%s %s" % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
     elif type == "brew":
-        command = "%s %s --yes" % (apt_get_str, module_name)
+        command = "%s %s --yes" % (brew_str, module_name)
     else:
         command = cmd
     print "Installing: %s " %command
@@ -59,14 +67,27 @@ def Installer_With_Brew():
     brew_module_list = ["wget", "duplicity","wxmac"]
     for each in brew_module_list:
         try:
-            install(cmd="brew install %s"%each)
+            cmd="brew install %s"%each
+            output = os.system(cmd)
+            print output
+            print (78 * '-')
         except:
             print "Unable to install %s"%each
 
 def Installer_With_Pip():
-    pip_module_list = ["psutil", "pyserial", "twisted", "numpy","imutils","appscript", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python-dateutil","python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
+    pip_module_list = ["pip","psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
+    pip_only_mac = ["appscript"]
+    
     for each in pip_module_list:
         try:
+            print "Installing %s module"%each
+            install(type="pip", module_name=each)
+        except:
+            print "unable to install/update %s"%each
+            
+    for each in pip_only_mac:
+        try:
+            print "Installing %s module"%each
             install(type="pip", module_name=each)
         except:
             print "unable to install/update %s"%each
@@ -143,32 +164,28 @@ def Install_Chrome_Browser():
     print (78 * '-')
     print ('Chrome Installation')
     print (78 * '-')
-    install(type = "brew", module_name = "libxss1 libappindicator1 libindicator7")
-    install(cmd = "/usr/local/bin/wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-    install(cmd = "sudo dpkg -i google-chrome*.deb")
-    install(cmd = "sudo brew install -f")
+    os.system( "brew cask install google-chrome")
+
 
 
 def Install_Brew():
         # brew Need to implement if brew is already implemented 
     try:
         brew_string ='/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
-        
-        cmd = "echo %s|sudo -S %s " %(sudo_pass,brew_string)
-        print os.system(cmd)
+        print os.system(brew_string)
         print "Successfully installed brew"
     except:
         print "Unable to install brew.  Please install brew manually"
         return False
 
 def main():
-    # Make sure we have root privleges
-    if check_if_ran_with_sudo():
-        print "Running with root privs"
+    # Make sure we are not running as root.  Brew doesn't like it
+    sys.stdout = Logger()  
+    if check_if_ran_with_sudo(False):
+        print "Running without root"
     else:
-        print "Error. Need root privleges."
+        print "Please do not run with sudo.  We will ask for sudo when needed.  Run again without sudo"
         quit()
-    sys.stdout = Logger()
     Install_Brew()
     Installer_With_Brew()
     Installer_With_Pip()
