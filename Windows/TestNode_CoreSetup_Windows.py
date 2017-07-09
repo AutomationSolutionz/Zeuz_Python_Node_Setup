@@ -37,7 +37,7 @@ def Installer_With_Pip():
     #upgrade pip itself
     
     pip_module_list = ["pip","psutil", "pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
-    pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "pypiwin32"]
+    pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "pypiwin32", "winshell"]
     
     for each in pip_module_list:
         try:
@@ -192,7 +192,23 @@ def unzip(zipFilePath, destDir):
             fd.close()
     zfile.close()
 
+def is_admin():
+    try:
+        import ctypes, sys
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
 def Check_Pre_Req():
+    
+    admin_check = is_admin()
+    if admin_check == False:
+        raw_input("Please run this script as admin. Click on windows icon > type cmd OR search for cmd > right click on 'Command Line Prompt' and select 'Run as Administrator'.  Hit Enter button to exit")
+        sys.exit()
+    else:
+        print "Admin check pass"
+    
+        
     if os.name != 'nt':
         print "System is not Windows"
         sys.exit(0)

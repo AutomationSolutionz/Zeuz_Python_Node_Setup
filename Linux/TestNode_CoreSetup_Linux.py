@@ -39,7 +39,7 @@ def Installer_With_Apt_get():
 
 
 def Installer_With_Pip():
-    pip_module_list = ["pip", "psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" ,"python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
+    pip_module_list = ["pip", "psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" ,"python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd", "pyscreenshot"]
     for each in pip_module_list:
         try:
             print "Installing %s module"%each
