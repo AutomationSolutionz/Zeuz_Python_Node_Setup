@@ -3,10 +3,57 @@
 
 import subprocess
 import shutil
-import os
+import os, os.path
 import sys
 
+from _winreg import (
+    CloseKey, OpenKey, QueryValueEx, SetValueEx,
+    HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE,
+    KEY_ALL_ACCESS, KEY_READ, REG_EXPAND_SZ, REG_SZ
+)
+
 install_str = "python -m pip install -U"
+
+############################# Windows registry editing #######################################
+def env_keys(user=True):
+    ''' Get root and subkey for the machine or user environment '''
+    if user:
+        root = HKEY_CURRENT_USER
+        subkey = 'Environment'
+    else:
+        root = HKEY_LOCAL_MACHINE
+        subkey = r'SYSTEM\ControlSet001\Control\Session Manager\Environment'
+    return root, subkey
+
+
+def get_env(name, user=True):
+    ''' Read the variable and return '''
+    root, subkey = env_keys(user)
+    key = OpenKey(root, subkey, 0, KEY_READ)
+    try:
+        value, _ = QueryValueEx(key, name)
+    except WindowsError:
+        return ''
+    return value
+
+
+def set_env(name, user, value):
+    ''' Write variable data to the registry key '''
+    root, subkey = env_keys(user)
+    key = OpenKey(root, subkey, 0, KEY_ALL_ACCESS)
+    SetValueEx(key, name, 0, REG_EXPAND_SZ, value)
+    CloseKey(key)
+    #SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, subkey) # Causes a hang, not sure if actually needed
+
+def append_env(name, user, value):
+    ''' Append the new data to the variable, assuming it's not already there '''
+    cur_value = get_env(name, user=user)
+    for path in cur_value.split(';'): # Do not add if already in variable
+        if path.upper() == value.upper():
+            return
+    value = cur_value + ';' + value
+    set_env(name, user, value)
+############################# Windows registry editing #######################################
 
 # Installation function
 def install(type = "", module_name = "", module_version = None, cmd = ""):
@@ -96,10 +143,15 @@ def Install_Android_SDK():
     webbrowser.open_new('http://filehippo.com/download_android_sdk/')
     raw_input('Press Any Key when Android SDK installed')
 
-    if os.path.isdir(os.environ["PROGRAMFILES"]+'\\Android\\android-sdk'):
+    if os.path.isdir(os.path.join('C:', os.sep, 'Program Files', 'Android', 'android-sdk')) or os.path.isdir(os.path.join(os.environ["LocalAppData"], 'Android', 'android-sdk')):
         os.environ['ANDROID_HOME'] = os.environ["LocalAppData"]+'\\Android\\android-sdk'
         os.environ['ADT_HOME'] = os.environ["LocalAppData"]+'\\Android\\android-sdk'
-        os.environ['PATH']+='%ANDROID_HOME%\tools;%ANDROID_HOME%\platform-tools'
+        os.environ['PATH']+='%ANDROID_HOME%\tools;%ANDROID_HOME%\platform-tools' # Set locally in command prompt?
+        append_env('PATH', False, os.environ['ANDROID_HOME']) # Store in PATH variable in registry for entire machine, so adb is in the path
+        
+        subprocess.Popen([os.path.join(os.environ['ANDROID_HOME'], 'SDK Manager.exe')]) # Execute SDK Manager, so the user can install missing packages
+        raw_input('Please install all suggested packages, and press any key when complete')
+        
         print "----------------------------------"
         print "Android SDK installed successfully"
         print "----------------------------------"
@@ -107,7 +159,7 @@ def Install_Android_SDK():
         print "-------------------------"
         print "Android SDK not installed"
         print "-------------------------"
-
+        quit()
 
 def Install_Java_JDK():
     import webbrowser
@@ -116,7 +168,7 @@ def Install_Java_JDK():
     raw_input('Press Any Key when Java JDK installed')
 
     installed = False
-    for name in glob.glob(os.environ["ProgramFiles"]+'\\Java\\jdk*'):
+    for name in glob.glob(os.path.join('C:', os.sep, 'Program Files', 'Java', 'jdk*')): # os.environ["ProgramFiles"] < This Gets Program Files(x86) for some reason, so we can't use it
         os.environ['JAVA_HOME'] = name
         os.environ['PATH']+='%JAVA_HOME%;%JAVA_HOME%\bin'
         print "----------------------------------"
@@ -128,7 +180,7 @@ def Install_Java_JDK():
         print "-------------------------"
         print "JAVA JDK not installed"
         print "-------------------------"
-
+        quit()
 
 class Logger(object):
     def __init__(self):

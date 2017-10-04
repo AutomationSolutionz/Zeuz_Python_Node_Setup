@@ -9,7 +9,6 @@ import platform
 import commands
 from subprocess import PIPE, Popen
 
-
 install_str = "python -m pip install -U"
 
 def cmdline(command):
@@ -216,13 +215,13 @@ def Check_Pre_Req():
         print "Python version is not 2.7"
         sys.exit(0)
     if platform.architecture()[0] != '32bit':
-        print "Python is not 32 bit"
+        print "Python is not 32 bit. Some modules which are used require 32bit Python. Please uninstall 64bit Python, and install the 32bit Python, and try again."
         sys.exit(0)
     if 'setuptools' not in cmdline("easy_install --version"):
-        print "easy_install is not installed"
+        print "'easy_install' is not installed"
         sys.exit(0)
     if 'pip' not in cmdline("pip --version"):
-        print "pip is not installed"
+        print "pip is not installed, or not in your PATH variable."
         sys.exit(0)
     print "Prereq verified successfully"
 
