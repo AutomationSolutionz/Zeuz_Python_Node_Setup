@@ -1,91 +1,148 @@
+#!/usr/bin/env python
 # Copyright 2015, Automation Solutionz
 # ---
+# Function: Installs all required libraries and modules for automation, except for IOS or Android files
 
-import subprocess
-import os
-import sys
-import commands
+import subprocess, re, os, sys # These modules should be available on every platform
 import getpass # For check_if_ran_with_sudo()
+try: import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
+except:
+    print "Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n"
+    print subprocess.check_output('sudo apt-get install python-cmd2', shell = True)
+    import commands # Try to import again
 
-install_str = "sudo pip install -U pip"
-apt_get_str = "sudo apt-get install"
+# Import local modules
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
+from Crossplatform import CommonUtils
+
+# Global variables
+sudo_pass = ''
+logfile = "TestNode_Core_Logs.log"
+
+# Libraries and modules to be installed
+apt_get_module_list = ["python-pip", "python-tk", "python-setuptools", "libxss1", "libappindicator1", "libindicator7", "python-dateutil", "python-xlib"]
+pip_module_list = ["pip", "psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd", "pyscreenshot"]
+
+# Commands that help with installation
+install_str = "pip install -U pip"
+apt_get_str = "apt-get -y install"
 
 # Installation function
-def install(type="", module_name="", module_version=None, cmd=""):
+def install(type = "", module_name = "", module_version = None, cmd = ""):
     command = ""
 
     if type == "pip":
-        command = "%s %s" % (install_str, module_name)
+        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
+        print "Installing: %s " %command.replace(sudo_pass, '*****')
     elif type == "apt-get":
-        command = "%s %s --yes" % (apt_get_str, module_name)
+        command = 'echo "%s" | sudo -S %s %s --yes' % (sudo_pass, apt_get_str, module_name)
+        print "Installing: %s " %command.replace(sudo_pass, '*****')
+    elif type == "sudo":
+        command = 'echo "%s" | sudo -S %s' % (sudo_pass, cmd) # Run command with sudo
     else:
-        command = cmd
-    print "Installing: %s " % command
+        command = cmd # Run command exactly as provided
+        print "Running: %s " % command.replace(sudo_pass, '*****')
+
     status, output = commands.getstatusoutput(command)
     print output
+    if status > 0:
+        sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
+
+    print "\n"
     print (78 * '-')
+    print "\n"
+    print "\n"
+
+    return status, output
 
 def Installer_With_Apt_get():
-    
-    apt_get_module_list = ["python-qt4", "python-qt4","duplicity","python-wxgtk2.8"]
     for each in apt_get_module_list:
         try:
-            print "Installing %s module"%each
+            sys.stdout.write("Installing: %s\n" % each, True) # Print to terminal window, and log file
             install(type="apt-get", module_name=each)
         except:
-            print "unable to install/update %s" % each
-
+            sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
 
 def Installer_With_Pip():
-    pip_module_list = ["pip", "psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" ,"python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd", "pyscreenshot"]
     for each in pip_module_list:
         try:
-            print "Installing %s module"%each
+            sys.stdout.write("Installing: %s\n" % each, True) # Print to terminal window, and log file
             install(type="pip", module_name=each)
         except:
-            print "unable to install/update %s"%each
-
-
+            if each == 'psutil': continue # This is expected to fail if installed
+            sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
 
 def Install_Chrome_Drivers():
-    ## Install Chrome 
-    # ** Improvement needed:  we need to make sure we check if chrome is already installed or not
+    import urllib3 # Here because it needs to be imported after we install it
+ 
     print (78 * '-')
-    print ('Chrome Installation')
+    sys.stdout.write("Installing: Chrome libraries\n", True) # Print to terminal window, and log file
     print (78 * '-')
-    install(type="apt-get", module_name="libxss1 libappindicator1 libindicator7")
-    install(cmd="wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-    install(cmd="sudo dpkg -i google-chrome*.deb")
-    install(cmd="sudo apt-get install -f")
     
-    import urllib3
+    # Cleanup any outstanding package issues
+    try:
+        sys.stdout.write("Configuring: dpkg\n", True)
+        install(type="sudo", cmd="dpkg --configure -a")
+    except:
+        sys.stdout.error("\tError configuring - See log file\n")
+
+    # Get latest version
     http = urllib3.PoolManager()
     try:
-        print "Getting latest version of chrome driver"
+        sys.stdout.write("Downloading: Chromedriver\n", True)
+        print "Checking Chromedriver version"
         r = http.request('GET', 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
         latest_version = r.data.split('\n')[0]
         print "latest version is: %s" % latest_version
     except:
         print "Unable to get the latest version."
-        return
-    download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_linux64.zip') % latest_version
-    print "Downloading latest Chrome driver from: %s" % download_link
-    install(type="apt-get", module_name="unzip")
-    install(cmd="wget -N " + download_link)
-    install(cmd="unzip chromedriver_linux64.zip")
-    install(cmd="chmod +x chromedriver")
-    install(cmd="sudo mv -f chromedriver /usr/local/share/chromedriver")
-    install(cmd="sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver")
-    install(cmd="sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver")
+        sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
+
+
+    # Download & Install
+    try:
+        # Download
+        download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_linux64.zip') % latest_version
+        print "Downloading latest Chrome driver from: %s" % download_link
+        install(type="apt-get", module_name="unzip")
+        #install(cmd="wget -N " + download_link)
+        CommonUtils.Download_File(download_link)
+
+        # Unpack
+        sys.stdout.write("Unpacking: Chrome driver\n", True) # Print to terminal window, and log file
+        install(cmd="unzip -o chromedriver_linux64.zip")
+        
+        # Install
+        sys.stdout.write("Installing: Chrome driver\n", True) # Print to terminal window, and log file
+        print "Make executable"
+        install(cmd="chmod +x chromedriver")
+        print "Move to file system"
+        install(type="sudo", cmd="mv -f chromedriver /usr/local/share/chromedriver")
+        print "Create links"
+        install(type="sudo", cmd="ln -f -s /usr/local/share/chromedriver /usr/local/bin/chromedriver")
+        install(type="sudo", cmd="ln -f -s /usr/local/share/chromedriver /usr/bin/chromedriver")
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
+        
+    try: install(cmd="rm chromedriver_linux64.zip")
+    except: pass
+        
 
 def Install_Firefox_Drivers():
-    import urllib3
+    import urllib3 # Here because it needs to be imported after we install it
     http = urllib3.PoolManager()
-    import re
+    
+    # Cleanup any outstanding package issues
     try:
-        print "Getting latest version of firefox driver"
+        sys.stdout.write("Configuring: dpkg\n", True)
+        install(type="sudo", cmd="dpkg --configure -a")
+    except:
+        sys.stdout.error("\tError configuring - See log file\n")
+
+    try:
+        sys.stdout.write("Installing: Firefox driver\n", True) # Print to terminal window, and log file
         r = http.request('GET', 'https://github.com/mozilla/geckodriver/releases/latest')
         raw_data = str(r.data).split('\n')
 
@@ -97,32 +154,35 @@ def Install_Firefox_Drivers():
                 break
     except:
         print "Unable to get the latest version."
-        return "failed"
-    download_link = ('https://github.com/mozilla/geckodriver/releases/download/%s/geckodriver-%s-linux64.tar.gz') % (
-    latest_version, latest_version)
+        sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
+
+    download_link = ('https://github.com/mozilla/geckodriver/releases/download/%s/geckodriver-%s-linux64.tar.gz') % (latest_version, latest_version)
     download_link = str(download_link)
     print "Downloading latest 64bit geckodriver from: %s" % download_link
-    install(cmd="wget -N " + download_link)
+    #install(cmd="wget -N " + download_link)
+    CommonUtils.Download_File(download_link)
+    
     geckodriver_cmd = ('tar -xvzf geckodriver-%s-linux64.tar.gz') % (latest_version)
     geckodriver_cmd = str(geckodriver_cmd)
     install(cmd=geckodriver_cmd)
     install(cmd="chmod +x geckodriver")
-    install(cmd="sudo mv -f geckodriver /usr/local/share/geckodriver")
-    install(cmd="sudo ln -s /usr/local/share/geckodriver /usr/local/bin/geckodriver")
-    install(cmd="sudo ln -s /usr/local/share/geckodriver /usr/bin/geckodriver")
+    install(type="sudo", cmd="mv -f geckodriver /usr/local/share/geckodriver")
+    install(type="sudo", cmd="ln -f -s /usr/local/share/geckodriver /usr/local/bin/geckodriver")
+    install(type="sudo", cmd="ln -f -s /usr/local/share/geckodriver /usr/bin/geckodriver")
+    install(cmd='rm geckodriver-%s-linux64.tar.gz' % (latest_version))
 
 def Install_PIP():
      # we should not have to do this ...
     print (78 * '-')
-    print ('Python PIP Installation')
+    sys.stdout.write("Installing: pip\n", True) # Print to terminal window, and log file
     print (78 * '-')
-    os.system("sudo add-apt-repository universe")
-    os.system("sudo apt-get update --yes")
+    install(type="sudo", cmd="add-apt-repository universe")
+    install(type="sudo", cmd="sudo apt-get update --yes")
     install(type="apt-get", module_name="python-pip")
 
-def Install_OpenCV():
+def Install_OpenCV(): #!!! NO LONGER USED !!!
     print (78 * '-')
-    print ('Install OpenCV')
+    sys.stdout.write("Installing: OpenCV\n", True) # Print to terminal window, and log file
     print (78 * '-')
     try:
         os.system("sudo chmod 777 ../backupDriverFiles/Desktop/opencv.sh")
@@ -130,26 +190,16 @@ def Install_OpenCV():
         os.system("sudo apt-get install python-opencv")
     except:
         print "unable to install/update OpenCV"
+        sys.stdout.error("\tAn error occured. See log file\n") # Print to terminal window, and log file
 
 def OS_Version():
     print (78 * '-')
-    print ('Linux Version')
+    sys.stdout.write("Linux Version:\n", True) # Print to terminal window, and log file
     print (78 * '-')
     command = "lsb_release -a"
     status, output = commands.getstatusoutput(command)
-    print output
-
-class Logger(object):
-    def __init__(self):
-        self.terminal = sys.stdout
-        self.log = open("TestNode_Installer_Logs.log", "w")
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-
-    def close(self):
-        self.log.close()
+    sys.stdout.write("%s\n" % output, True) # Print to terminal window, and log file
+    sys.stdout.write("\n", True) # Print to terminal window, and log file
 
 def check_if_ran_with_sudo():
     global sudo_pass
@@ -179,21 +229,33 @@ def check_if_ran_with_sudo():
             sudo_pass = passwd
             return True
 
-def main():
-    # Make sure we have root privleges
-    if check_if_ran_with_sudo():
-        print "Running with root privs"
+def main(rungui = False):
+    if rungui: # GUI will only run this if it already has the password, and it's verified
+        global sudo_pass
+        gui = True
+        sudo_pass = rungui # Save password
     else:
-        print "Error. Need root privleges."
-        quit()
-    sys.stdout = Logger()
+        # Make sure we have root privleges
+        if check_if_ran_with_sudo():
+            print "Running with root privs\n"
+        else:
+            print "Error - Need root privleges\n"
+            quit()
+
+    # Setup logging
+    CommonUtils.Logger_Setup(logfile, gui)
+    
+    # Perform installation
     OS_Version()
+    Installer_With_Apt_get()
     Installer_With_Pip()
     Install_Chrome_Drivers()
     Install_Firefox_Drivers()
-    Install_OpenCV() 
-    sys.stdout.close()
+    
+    sys.stdout.write("If Android testing is required, please run the Android installer\n", True)
 
-
+    # Clean up logger, and reinstate STDOUT/ERR
+    CommonUtils.Logger_Teardown(logfile)
+    
 if __name__ == "__main__":
     main()

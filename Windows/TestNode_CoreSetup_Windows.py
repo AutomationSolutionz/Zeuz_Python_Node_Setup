@@ -1,15 +1,68 @@
 # Copyright 2015, Automation Solutionz
 # ---
 
-import subprocess
-import shutil
-import os
-import sys
-import platform
-import commands
-from subprocess import PIPE, Popen
+def detect_admin():
+    # Windows only - Return True if program run as admin
+    
+    import subprocess
+    if sys.platform == 'win32':
+        command = 'net session >nul 2>&1' # This command can only be run by admin
+        try: output = subprocess.check_output(command, shell=True) # Causes an exception if we can't run
+        except: return False
+    return True
+
+def get_required_mods():
+    print "A required module is missing. I'll try to install it automatically.\n"
+    
+    import subprocess
+    if sys.platform == 'win32':
+        try:
+            # Elevate permissions
+            if not detect_admin():
+                os.system('powershell -command Start-Process "python \'%s\'" -Verb runAs' % sys.argv[0].split(os.sep)[-1]) # Re-run this program with elevated permissions to admin
+                quit()
+            # Install
+            # Note: Tkinter is not available through pip nor easy_install, we assume it was packaged with Python
+            print subprocess.check_output('python -m pip install setuptools -U')
+            print subprocess.check_output('python -m pip install requests -U')
+            print subprocess.check_output('python -m pip download pillow') # Must be done before installing or Image and ImageTk will fail
+            print subprocess.check_output('python -m pip install pillow -U')
+        except:
+            print "Failed to install. Please run: pip download setuptools"
+            raw_input('Press ENTER to exit')
+            quit()
+
+    else:
+        print "Could not automatically install required modules"
+        raw_input('Press ENTER to exit')
+        quit()
+        
+    # Verify install worked
+    try:
+        import subprocess
+        import shutil, os, sys, platform, commands, requests
+        from subprocess import PIPE, Popen
+        print "Successfully installed. Will now try to run the graphical interface."
+    except:
+        print "Failed to install. Please try to install manually"
+        raw_input('Press ENTER to exit')
+        quit()
+
+# Have user install Tk if this fails - we try to do it for them first
+try:
+    import subprocess
+    import shutil, os, sys, platform, commands, requests
+    from subprocess import PIPE, Popen
+except:
+    get_required_mods()
+
+# Import local modules
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
+from Crossplatform import CommonUtils
 
 install_str = "python -m pip install -U"
+logfile = "TestNode_Core_Logs.log"
+
 
 def cmdline(command):
     process = Popen(
@@ -35,34 +88,38 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
 def Installer_With_Pip():
     #upgrade pip itself
     
-    pip_module_list = ["pip","psutil", "pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd"]
+    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml", "gi","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client", "pypiwin32"]
     pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "pypiwin32", "winshell"]
     
     for each in pip_module_list:
         try:
+            sys.stdout.write("Installing: %s\n" % each, True) # Print to terminal window, and log file
             install(type="pip", module_name=each)
+            import site
+            reload(site)
         except:
-            print "unable to install/update %s"%each
+            sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
 
     for each in pip_module_win_only:
         try:
+            sys.stdout.write("Installing: %s\n" % each, True) # Print to terminal window, and log file
             install(type="pip", module_name=each)
         except:
-            print "unable to install/update %s"%each
+            sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
 def Installer_With_Exe():
     
     list_of_exe_link = [
-                        "https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt4-4.11.4-gpl-Py2.7-Qt4.8.7-x32.exe",
-                        "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
+                        "http://people.csail.mit.edu/hubert/pyaudio/packages/pyaudio-0.2.8.py27.exe",
                         ]
     for each in list_of_exe_link:
         try:
+            sys.stdout.write("Installing: %s\n" % each.split('/')[-1], True) # Print to terminal window, and log file
             easy_install = "easy_install " + each 
             install(cmd=easy_install)
         except:
-            print "unable to install/update %s"%each
+            sys.stdout.error("\tAn error occurred. See log for more details.\n")
     
 def Selenium_Driver_Files_Windows():
     Chrom_Driver_Download()
@@ -74,6 +131,7 @@ def Ie_Driver_Download():
     import urllib3
     http = urllib3.PoolManager()
     try:
+        sys.stdout.write("Downloading: IE driver\n", True) # Print to terminal window, and log file
         print "Getting latest version of IE driver"
         r = http.request('GET', 'http://selenium-release.storage.googleapis.com')
         tmp = r.data.split('/IEDriverServer_Win32')[:-1]
@@ -81,6 +139,7 @@ def Ie_Driver_Download():
         print "latest version is: %s"%latest_version
     except:
         print "Unable to get the latest version."
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
         return
     download_link = ('http://selenium-release.storage.googleapis.com/%s/IEDriverServer_Win32_%s.0.zip')%(latest_version,latest_version)
     download_link = str(download_link)
@@ -89,16 +148,19 @@ def Ie_Driver_Download():
     try:
         with http.request('GET', download_link, preload_content=False) as r, open(path, 'wb') as out_file:       
             shutil.copyfileobj(r, out_file)
-        print "Successfully download the file: %s"%path     
-        unzip(path,r'C:\Python27\Scripts')  
+        print "Successfully download the file: %s"%path
+        sys.stdout.write("Unpacking: IE driver\n", True) # Print to terminal window, and log file     
+        CommonUtils.unzip(path,r'C:\Python27\Scripts')  
     except:
         print "Unable to download: %s "%download_link
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
 def Firefox_Driver_Download():
     import urllib3
     http = urllib3.PoolManager()
     import re
     try:
+        sys.stdout.write("Downloading: Firefox driver\n", True) # Print to terminal window, and log file
         print "Getting latest version of Firefox driver"
         r = http.request('GET', 'https://github.com/mozilla/geckodriver/releases/latest')
         raw_data = str(r.data).split('\n')
@@ -111,48 +173,64 @@ def Firefox_Driver_Download():
                 break    
     except:
         print "Unable to get the latest version."
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
         return "failed"
-    download_link = ('https://github.com/mozilla/geckodriver/releases/download/%s/geckodriver-%s-win64.zip')%(latest_version,latest_version)
+    
+    download_link = ('https://github.com/mozilla/geckodriver/releases/download/%s/geckodriver-%s-win64.zip'%(latest_version,latest_version))
     download_link = str(download_link)
     print "Downloading latest 64bit geckodriver from: %s" %download_link
     path = r'C:\Python27\Scripts\geckodriver.zip'
+    
     try:
-        with http.request('GET', download_link, preload_content=False) as r, open(path, 'wb') as out_file:       
-            shutil.copyfileobj(r, out_file)
-        print "Successfully download the file: %s"%path     
-        unzip(path,r'C:\Python27\Scripts')  
+        if not CommonUtils.Download_File(download_link, path):
+            sys.stdout.error("\tAn error occurred. See log for more details.\n")
+            return
+        
+        print "Successfully download the file: %s"%path
+        sys.stdout.write("Unpacking: Firefox driver\n", True) # Print to terminal window, and log file     
+        CommonUtils.unzip(path,r'C:\Python27\Scripts')  
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print Error_Detail
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
 def Chrom_Driver_Download():
     import urllib3
     http = urllib3.PoolManager()
     try:
+        sys.stdout.write("Downloading: Chrome driver\n", True) # Print to terminal window, and log file
         print "Getting latest version of chrome driver"
         r = http.request('GET', 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
         latest_version = r.data.split('\n')[0]
         print "latest version is: %s"%latest_version
     except:
         print "Unable to get the latest version."
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
         return
-    download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_win32.zip')%latest_version
-    print "Downloading latest Chrom 32 bit driver from: %s" %download_link
+    
+    download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_win32.zip'%latest_version)
+    print "Downloading latest Chrome 32 bit driver from: %s" %download_link
     path = r'C:\Python27\Scripts\chromedriver_win32.zip'
+    
     try:
-        with http.request('GET', download_link, preload_content=False) as r, open(path, 'wb') as out_file:       
-            shutil.copyfileobj(r, out_file)
-        print "Successfully download the file: %s"%path     
-        unzip(path,r'C:\Python27\Scripts')  
+        if not CommonUtils.Download_File(download_link, path):
+            sys.stdout.error("\tAn error occurred. See log for more details.\n")
+            return
+        
+        print "Successfully download the file: %s"%path
+        sys.stdout.write("Unpacking: Chrome driver\n", True) # Print to terminal window, and log file     
+        CommonUtils.unzip(path,r'C:\Python27\Scripts')  
     except:
-        print "Unable to download: % "%download_link
+        print "Unable to download: %s "%download_link
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
 def selenium_Server_StandAlone_Driver_Download():
     import urllib3
     http = urllib3.PoolManager()
     try:
+        sys.stdout.write("Downloading: Selenium driver\n", True) # Print to terminal window, and log file
         print "Getting latest version of Selenium Server Standalone driver"
         r = http.request('GET', 'http://selenium-release.storage.googleapis.com')
         tmp = r.data.split('/selenium-server-standalone')[:-1]
@@ -160,37 +238,24 @@ def selenium_Server_StandAlone_Driver_Download():
         print "latest version is: %s"%latest_version
     except:
         print "Unable to get the latest version."
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
         return
-    download_link = ('http://selenium-release.storage.googleapis.com/%s/selenium-server-standalone-%s.0.jar')%(latest_version,latest_version)
+    
+    download_link = ('http://selenium-release.storage.googleapis.com/%s/selenium-server-standalone-%s.0.jar'%(latest_version,latest_version))
     download_link = str(download_link)
     print "Downloading latest selenium_Server_StandAlone: %s" %download_link
     path = r'C:\Python27\Scripts\selenium-server-standalone.jar'
+    
     try:
-        with http.request('GET', download_link, preload_content=False) as r, open(path, 'wb') as out_file:       
-            shutil.copyfileobj(r, out_file)  
+        if not CommonUtils.Download_File(download_link, path):
+            sys.stdout.error("\tAn error occurred. See log for more details.\n")
+            return
+        
         print "Successfully download the file: %s"%path
     except:
-        print "Unable to download: % "%download_link
+        print "Unable to download: %s "%download_link
+        sys.stdout.error("\tAn error occurred. See log for more details.\n")
         
-def unzip(zipFilePath, destDir):
-    import os
-    import zipfile
-    zfile = zipfile.ZipFile(zipFilePath)
-    print "Unzipping %s to %s"%(zipFilePath,destDir)
-    for name in zfile.namelist():
-        (dirName, fileName) = os.path.split(name)
-        if fileName == '':
-            # directory
-            newDir = destDir + '/' + dirName
-            if not os.path.exists(newDir):
-                os.mkdir(newDir)
-        else:
-            # file
-            fd = open(destDir + '/' + name, 'wb')
-            fd.write(zfile.read(name))
-            fd.close()
-    zfile.close()
-
 def is_admin():
     try:
         import ctypes, sys
@@ -198,54 +263,60 @@ def is_admin():
     except:
         return False
 
-def Check_Pre_Req():
+def Check_Pre_Req(gui):
     
     admin_check = is_admin()
     if admin_check == False:
-        raw_input("Please run this script as admin. Click on windows icon > type cmd OR search for cmd > right click on 'Command Line Prompt' and select 'Run as Administrator'.  Hit Enter button to exit")
-        sys.exit()
+        if gui:
+            sys.stdout.error("We tried to obtain administrator permissions automatically but failed. Please re-run this script with administrator privledges.")
+        else:
+            raw_input("Please run this script as admin. Click on windows icon > type cmd OR search for cmd > right click on 'Command Line Prompt' and select 'Run as Administrator'.  Hit Enter button to exit")
+        return False
     else:
         print "Admin check pass"
     
         
     if os.name != 'nt':
-        print "System is not Windows"
-        sys.exit(0)
+        sys.stdout.error("This must be run on Windows 7 and newer")
+        return False
     if sys.version_info[:2] != (2,7):
-        print "Python version is not 2.7"
-        sys.exit(0)
+        sys.stdout.error("Python must be v2.7 and 32-bit")
+        return False
     if platform.architecture()[0] != '32bit':
-        print "Python is not 32 bit. Some modules which are used require 32bit Python. Please uninstall 64bit Python, and install the 32bit Python, and try again."
-        sys.exit(0)
+        sys.stdout.error("Python must be 32 bit. Some modules which are used require 32bit Python. Please uninstall 64bit Python, and install the 32bit Python, and try again.")
+        return False
     if 'setuptools' not in cmdline("easy_install --version"):
-        print "'easy_install' is not installed"
-        sys.exit(0)
+        sys.stdout.error("'easy_install' is not installed and is required")
+        return False
     if 'pip' not in cmdline("pip --version"):
-        print "pip is not installed, or not in your PATH variable."
-        sys.exit(0)
-    print "Prereq verified successfully"
+        sys.stdout.error("pip is not installed, or not in your PATH variable. It should be located in a sub-directory of the Python directory called 'Scripts'")
+        return False
+    
+    print "Pre-requirements verified successfully"
+    return True
 
-class Logger(object):
-    def __init__(self):
-        self.terminal = sys.stdout
-        self.log = open("TestNode_Installer_Logs.log", "w")
+def main(rungui = False):
+    if not rungui: # GUI elevates already, so no need to do it again
+        # If run in Windows, elevate permissions 
+        if sys.platform == 'win32':
+            if not detect_admin():
+                os.system('powershell -command Start-Process "python \'%s\'" -Verb runAs' % sys.argv[0].split(os.sep)[-1]) # Re-run this program with elevated permissions to admin
+                quit() # Exit this program, the elevated program should run
 
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
+    # Setup logging
+    CommonUtils.Logger_Setup(logfile, rungui)
 
-    def close(self):
-        self.log.close()
+    # Install
+    if Check_Pre_Req(rungui):
+        Installer_With_Pip()
+        Installer_With_Exe()
+        Selenium_Driver_Files_Windows()
 
+    sys.stdout.write("If Android testing is required, please run the Android installer\n", True)
 
-def main():
-    sys.stdout = Logger()
-    Check_Pre_Req()    
-    Installer_With_Pip()
-    Installer_With_Exe()
-    Selenium_Driver_Files_Windows()
-    print "Install Completed!"
-    sys.stdout.close()
+    # Clean up logger, and reinstate STDOUT/ERR
+    CommonUtils.Logger_Teardown(logfile)
 
 if __name__=="__main__":
     main()
+    raw_input("Press ENTER to exit")
