@@ -1,4 +1,6 @@
 [Python Setup]
-version = 2.3
+version = 2.4
 [Release Date]
-date= 2017-11-30
+date= 2017-12-08
+[Release Note]
+Note = Windows installer fix; Logging improvement

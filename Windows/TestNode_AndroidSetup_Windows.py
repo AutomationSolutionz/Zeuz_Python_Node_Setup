@@ -44,6 +44,7 @@ global Android_Tools_bin_Dir
 global Android_Build_Tools_Dir
 global Downloaded_Path
 global Temp_Tools_Dir
+global current_script_path
 
 npm_path = os.environ["ProgramW6432"]+os.sep+ "nodejs"
 appium_path = os.getenv('APPDATA') + os.sep + "npm" + os.sep + "appium"
@@ -55,6 +56,8 @@ Android_Build_Tools_Dir = Android_Home_Dir + os.sep + "build-tools"
 Downloaded_Path = expanduser("~")+os.sep + "Downloads" 
 Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
 logfile = "TestNode_Android_Logs.log"
+
+current_script_path = sys.path[0]
 
 def cmdline(command):
     process = Popen(
@@ -273,7 +276,8 @@ def Install_JDK():
             print "Extracting completed"
             
             print "We are installing java silently, please wait..."
-            jdk_exe_path = Downloaded_Path + os.sep+ r"jdk-8u144-windows-x64.exe"
+            
+            jdk_exe_path = current_script_path + os.sep+ r"jdk-8u144-windows-x64.exe"
             silent_installer_command = "%s /s"%jdk_exe_path
             sys.stdout.write("Installing JDK silently from %s.  This will take some time...\n"%jdk_exe_path, True) # Print to terminal window, and log file
 
@@ -285,7 +289,7 @@ def Install_JDK():
             Delete_File(Downloaded_Path + os.sep + installer_file_part_1)
             Delete_File(Downloaded_Path + os.sep + installer_file_part_2)
             Delete_File(Downloaded_Path + os.sep + installer_file_part_3)
-            Delete_File(Downloaded_Path + os.sep + 'jdk-8u144-windows-x64.exe')
+            Delete_File(current_script_path + os.sep + 'jdk-8u144-windows-x64.exe')
             #setting java path
             JAVA_PATH()
             sys.stdout.write("JDK Install completed\n", True)
@@ -451,7 +455,7 @@ def Android_SDK(upgrade=False):
                 
                 sys.stdout.write("Moving SDK folder to desktop\n", True) # Print to terminal window, and log file
                 print "Moving SDK folder to desktop"
-                src_folder = Downloaded_Path + os.sep + "sdk"  
+                src_folder = current_script_path + os.sep + "sdk"  
                 des_folder = Android_Home_Dir
                 Move_and_Overwrite_Folder(src_folder, des_folder)
                 sys.stdout.write("Cleaning up temp android SDK files \n", True) # Print to terminal window, and log file
@@ -696,7 +700,11 @@ def Check_If_in_Path(PATH_NAME,value):
             True
         reg_path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
         reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
-        system_environment_variables = winreg.QueryValueEx(reg_key, PATH_NAME)[0]
+        try:
+            system_environment_variables = winreg.QueryValueEx(reg_key, PATH_NAME)[0]
+        except:
+            print "Value = '%s' is not found.  We will add it."%value
+            return False
         if value in system_environment_variables:
             print "Value = '%s' already exists under %s"%(value, PATH_NAME)
             return True
@@ -732,8 +740,20 @@ def Update_Sys_Env_Variable(PATH_NAME,my_value):
         # write it back
         winreg.SetValueEx(key, PATH_NAME, 0, winreg.REG_EXPAND_SZ, value)
         winreg.CloseKey(key)
+
         # notify the system about the changes
         win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, 'Environment')
+        # we will add python path again to be on the safe side
+        try:    
+            if PATH_NAME == "PATH":
+                current_value = os.environ['PATH']
+                path_list = current_value.split(";")
+                if my_value not in value_list:
+                    os.environ['PATH'] += ';'+my_value
+            else:
+                os.environ[PATH_NAME] = my_value
+        except:
+            True
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
