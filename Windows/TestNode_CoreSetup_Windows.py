@@ -88,8 +88,8 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
 def Installer_With_Pip():
     #upgrade pip itself
     
-    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml", "gi","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client", "pypiwin32"]
-    pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "pypiwin32", "winshell"]
+    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml", "gi","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client"]
+    pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "winshell"]
     
     for each in pip_module_list:
         try:
@@ -112,6 +112,7 @@ def Installer_With_Exe():
     
     list_of_exe_link = [
                         "http://people.csail.mit.edu/hubert/pyaudio/packages/pyaudio-0.2.8.py27.exe",
+                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pywin32-221.win32-py2.7.exe"
                         ]
     for each in list_of_exe_link:
         try:

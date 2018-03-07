@@ -1,6 +1,6 @@
 [Python Setup]
-version = 2.4
+version = 2.5
 [Release Date]
-date= 2017-12-08
+date= 2018-03-07
 [Release Note]
-Note = Windows installer fix; Logging improvement
+Note = Win32api fix
