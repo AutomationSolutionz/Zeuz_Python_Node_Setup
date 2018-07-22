@@ -1,6 +1,6 @@
 [Python Setup]
-version = 2.5
+version = 2.7
 [Release Date]
-date= 2018-03-07
+date= 2018-07-22
 [Release Note]
-Note = Win32api fix
+Note = Windows GUI Automation modules

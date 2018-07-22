@@ -26,7 +26,7 @@ brew_str = "/usr/local/bin/brew install"
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
                    "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi",
-                   "xlrd"]
+                   "xlrd","hashlib"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'chromedriver', 'geckodriver']
 
@@ -123,7 +123,7 @@ def Install_Chrome_Drivers():
         print output
         print (78 * '-')
     except:
-        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window and log file
         print "Unable to link chromedriver"
 
 
@@ -135,7 +135,7 @@ def Install_Pip():
     try:
         sys.stdout.write("Installing: pip\n", True)
         cmd = "sudo easy_install pip" #!!! Not working. Not sure why - repository exists
-        #output = os.system(cmd)
+        output = os.system(cmd)
         
         # Download pip directly, and run its installer
         install(cmd="wget https://bootstrap.pypa.io/get-pip.py")

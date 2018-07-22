@@ -233,7 +233,7 @@ class Application(tk.Frame):
             elif sys.platform == 'linux2':
                 self.filelist.update(self.get_installer_scripts('Linux'))
             elif sys.platform == 'darwin':
-                self.filelist.update(elf.get_installer_scripts('Mac'))
+                self.filelist.update(self.get_installer_scripts('Mac'))
             else: self.log.insert('end', "Error: could not detect platform. Windows, Mac, and Linux are supported.")
             sys.path.append(installer_location) # Set the path, so the can find the modules
             

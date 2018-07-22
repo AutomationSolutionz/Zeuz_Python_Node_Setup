@@ -1,5 +1,8 @@
 # Copyright 2015, Automation Solutionz
 # ---
+import os,sys
+
+python_dir = os.path.dirname(sys.executable)
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -88,7 +91,7 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
 def Installer_With_Pip():
     #upgrade pip itself
     
-    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml", "gi","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client"]
+    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client"]
     pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "winshell"]
     
     for each in pip_module_list:
@@ -112,7 +115,8 @@ def Installer_With_Exe():
     
     list_of_exe_link = [
                         "http://people.csail.mit.edu/hubert/pyaudio/packages/pyaudio-0.2.8.py27.exe",
-                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pywin32-221.win32-py2.7.exe"
+                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pywin32-221.win32-py2.7.exe",
+                        "hashlib"
                         ]
     for each in list_of_exe_link:
         try:
@@ -145,13 +149,13 @@ def Ie_Driver_Download():
     download_link = ('http://selenium-release.storage.googleapis.com/%s/IEDriverServer_Win32_%s.0.zip')%(latest_version,latest_version)
     download_link = str(download_link)
     print "Downloading latest IE 32 bit driver from: %s" %download_link
-    path = r'C:\Python27\Scripts\IEdriver_win32.zip'
+    path = r'%s\Scripts\IEdriver_win32.zip'%python_dir
     try:
         with http.request('GET', download_link, preload_content=False) as r, open(path, 'wb') as out_file:       
             shutil.copyfileobj(r, out_file)
         print "Successfully download the file: %s"%path
         sys.stdout.write("Unpacking: IE driver\n", True) # Print to terminal window, and log file     
-        CommonUtils.unzip(path,r'C:\Python27\Scripts')  
+        CommonUtils.unzip(path,r'%s\Scripts'%python_dir)
     except:
         print "Unable to download: %s "%download_link
         sys.stdout.error("\tAn error occurred. See log for more details.\n")
@@ -180,7 +184,7 @@ def Firefox_Driver_Download():
     download_link = ('https://github.com/mozilla/geckodriver/releases/download/%s/geckodriver-%s-win64.zip'%(latest_version,latest_version))
     download_link = str(download_link)
     print "Downloading latest 64bit geckodriver from: %s" %download_link
-    path = r'C:\Python27\Scripts\geckodriver.zip'
+    path = r'%s\Scripts\geckodriver.zip'%python_dir
     
     try:
         if not CommonUtils.Download_File(download_link, path):
@@ -189,7 +193,7 @@ def Firefox_Driver_Download():
         
         print "Successfully download the file: %s"%path
         sys.stdout.write("Unpacking: Firefox driver\n", True) # Print to terminal window, and log file     
-        CommonUtils.unzip(path,r'C:\Python27\Scripts')  
+        CommonUtils.unzip(path,r'%s\Scripts'%python_dir)
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -213,7 +217,7 @@ def Chrom_Driver_Download():
     
     download_link = ('http://chromedriver.storage.googleapis.com/%s/chromedriver_win32.zip'%latest_version)
     print "Downloading latest Chrome 32 bit driver from: %s" %download_link
-    path = r'C:\Python27\Scripts\chromedriver_win32.zip'
+    path = r'%s\Scripts\chromedriver_win32.zip'%python_dir
     
     try:
         if not CommonUtils.Download_File(download_link, path):
@@ -222,7 +226,7 @@ def Chrom_Driver_Download():
         
         print "Successfully download the file: %s"%path
         sys.stdout.write("Unpacking: Chrome driver\n", True) # Print to terminal window, and log file     
-        CommonUtils.unzip(path,r'C:\Python27\Scripts')  
+        CommonUtils.unzip(path,r'%s\Scripts'%python_dir)
     except:
         print "Unable to download: %s "%download_link
         sys.stdout.error("\tAn error occurred. See log for more details.\n")
@@ -245,7 +249,7 @@ def selenium_Server_StandAlone_Driver_Download():
     download_link = ('http://selenium-release.storage.googleapis.com/%s/selenium-server-standalone-%s.0.jar'%(latest_version,latest_version))
     download_link = str(download_link)
     print "Downloading latest selenium_Server_StandAlone: %s" %download_link
-    path = r'C:\Python27\Scripts\selenium-server-standalone.jar'
+    path = r'%s\Scripts\selenium-server-standalone.jar'%python_dir
     
     try:
         if not CommonUtils.Download_File(download_link, path):
@@ -296,6 +300,20 @@ def Check_Pre_Req(gui):
     print "Pre-requirements verified successfully"
     return True
 
+def download_dlls_for_windows_automation_and_extract():
+    try:
+        sys.stdout.write("Downloading Necessary DLL files for Windows Automation\n",True)
+        zip_file_destination=r'%s\DLLs\win_dll.zip'%python_dir
+        dll_download_link = 'https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/win_dll.zip'
+        CommonUtils.Download_File(dll_download_link,zip_file_destination)
+        sys.stdout.write("Download completed for necessary DLL files for Windows automation\n", True)
+        sys.stdout.write("Extracting DLL files\n", True)
+        CommonUtils.unzip(zip_file_destination,r'%s\DLLs'%python_dir)
+        sys.stdout.write("DLL files extracted successfully\n", True)
+    except:
+        sys.stdout.error("DLL file couldn't be downloaded/extracted. Please manually download it from this link: %s and extract the zip file to %s (or to the path where Python 2.7 is installed)"%(dll_download_link,zip_file_destination))
+
+
 def main(rungui = False):
     if not rungui: # GUI elevates already, so no need to do it again
         # If run in Windows, elevate permissions 
@@ -312,6 +330,7 @@ def main(rungui = False):
         Installer_With_Pip()
         Installer_With_Exe()
         Selenium_Driver_Files_Windows()
+        download_dlls_for_windows_automation_and_extract()
 
     sys.stdout.write("If Android testing is required, please run the Android installer\n", True)
 
