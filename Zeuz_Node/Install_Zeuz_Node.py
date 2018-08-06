@@ -81,11 +81,9 @@ def install_all():
     prints("Zeuz Node installed on the desktop\n")
 
 def main(rungui = True):
-    if rungui != False: gui = True # Root password not needed here - we only write to local user
-    else: gui = False
 
     # Setup logging
-    CommonUtils.Logger_Setup(logfile, gui)
+    CommonUtils.Logger_Setup(logfile, rungui)
 
     # Install
     install_all()

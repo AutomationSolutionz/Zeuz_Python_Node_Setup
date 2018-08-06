@@ -269,7 +269,6 @@ def check_if_ran_with_sudo():
 def main(rungui = False):
     if rungui: # GUI will only run this if it already has the password, and it's verified
         global sudo_pass
-        gui = True
         sudo_pass = rungui # Save password
     else:
         # Make sure we have root privleges
@@ -280,7 +279,7 @@ def main(rungui = False):
             quit()
 
     # Setup logging
-    CommonUtils.Logger_Setup(logfile, gui)
+    CommonUtils.Logger_Setup(logfile, rungui)
 
     # Install apt modules
     Install_With_Apt()

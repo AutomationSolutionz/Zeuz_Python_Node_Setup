@@ -125,6 +125,25 @@ def Installer_With_Exe():
             install(cmd=easy_install)
         except:
             sys.stdout.error("\tAn error occurred. See log for more details.\n")
+
+
+def Installer_With_MSI():
+    list_of_msi_link = [
+        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/VCForPython27.msi",
+    ]
+    for each in list_of_msi_link:
+        file_name = each.split('/')[-1]
+        try:
+            dl_path = r'%s\%s'%(python_dir,file_name)
+            if not CommonUtils.Download_File(each, dl_path):
+                sys.stdout.error("\tAn error occurred while downloading file. See log for more details.\n")
+                #print("\tAn error occurred while downloading file. See log for more details.\n")
+                return
+            print "installing: %s " % file_name
+            print os.system('msiexec /i %s /qn'%dl_path)
+        except:
+            #print("\tAn error occurred In Installing. See log for more details.\n")
+            sys.stdout.error("\tAn error occurred In Installing. See log for more details.\n")
     
 def Selenium_Driver_Files_Windows():
     Chrom_Driver_Download()
@@ -328,6 +347,7 @@ def main(rungui = False):
     # Install
     if Check_Pre_Req(rungui):
         Installer_With_Pip()
+        Installer_With_MSI()
         Installer_With_Exe()
         Selenium_Driver_Files_Windows()
         download_dlls_for_windows_automation_and_extract()
@@ -340,3 +360,4 @@ def main(rungui = False):
 if __name__=="__main__":
     main()
     raw_input("Press ENTER to exit")
+

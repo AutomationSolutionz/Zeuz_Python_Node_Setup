@@ -15,7 +15,6 @@ except:
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
 
-gui = False  # Ran with GUI
 sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
@@ -180,9 +179,8 @@ def Install_Brew():
 
 
 def main(rungui = False):
-    global gui, sudo_pass
+    global sudo_pass
     if rungui: # GUI will only run this if it already has the password, and it's verified
-        gui = True
         sudo_pass = rungui # Save password
     else:
         # Make sure we have root privleges
@@ -193,7 +191,7 @@ def main(rungui = False):
             quit()
 
     # Setup logging
-    CommonUtils.Logger_Setup(logfile, gui)
+    CommonUtils.Logger_Setup(logfile, rungui)
 
     # Install
     Install_Brew()
