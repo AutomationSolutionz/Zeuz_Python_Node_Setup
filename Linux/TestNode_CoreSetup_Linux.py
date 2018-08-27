@@ -147,9 +147,9 @@ def Install_Firefox_Drivers():
         raw_data = str(r.data).split('\n')
 
         for each in raw_data:
-            if '<span class="css-truncate-target">v' in each:
-                result = re.search('<span class="css-truncate-target">(.*)</span>', each)
-                latest_version = result.group(1)
+            if '<span class="css-truncate-target"' in each:
+                result = re.search('v(.*)</span>', each)
+                latest_version = "v" + result.group(1)
                 print "Latest geckodriver for Firefox is: %s" % latest_version
                 break
     except:

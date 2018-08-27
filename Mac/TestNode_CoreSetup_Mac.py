@@ -25,9 +25,9 @@ brew_str = "/usr/local/bin/brew install"
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
                    "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi",
-                   "xlrd","hashlib"]
+                   "xlrd","hashlib","tzlocal"]
 pip_only_mac = ["appscript"]
-brew_module_list = ["wget", "wxmac", 'chromedriver', 'geckodriver']
+brew_module_list = ["wget", "wxmac", 'geckodriver']
 
 def check_if_ran_with_sudo():
     global sudo_pass
@@ -117,7 +117,7 @@ def Install_Chrome_Drivers():
     Install_Chrome_Browser()
     try:
         sys.stdout.write("Installing: Chrome Driver\n", True)
-        cmd = "brew link chromedriver"
+        cmd = "brew cask install chromedriver"
         output = os.system(cmd)
         print output
         print (78 * '-')

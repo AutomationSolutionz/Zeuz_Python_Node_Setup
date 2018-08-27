@@ -17,7 +17,7 @@ def detect_admin():
 def get_required_mods():
     print "A required module is missing. I'll try to install it automatically.\n"
     
-    import subprocess
+    import subprocess,os,sys
     if sys.platform == 'win32':
         try:
             # Elevate permissions
@@ -190,9 +190,9 @@ def Firefox_Driver_Download():
         raw_data = str(r.data).split('\n')
         
         for each in raw_data:
-            if '<span class="css-truncate-target">v' in each:
-                result = re.search('<span class="css-truncate-target">(.*)</span>', each)
-                latest_version = result.group(1)
+            if '<span class="css-truncate-target"' in each:
+                result = re.search('v(.*)</span>', each)
+                latest_version = "v" + result.group(1)
                 print "Latest geckodriver for Firefox is: %s"%latest_version
                 break    
     except:
