@@ -7,7 +7,7 @@ import sys
 import commands
 
 install_str = "sudo pip install -U pip"
-apt_get_str = "sudo apt-get install"
+
 
 
 # Installation function
@@ -18,8 +18,7 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
         command = "%s %s" % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
-    elif type == "apt-get":
-        command = "%s %s --yes" % (apt_get_str, module_name)
+
     else:
         command = cmd
     print "Installing: %s " %command
@@ -73,9 +72,6 @@ def main():
     print (78 * '-')
     print ('Python PIP Installation')
     print (78 * '-')
-    os.system("sudo add-apt-repository universe")
-    os.system("sudo apt-get update --yes")
-    install(type = "apt-get", module_name = "python-pip")
 
 ## Install PIP modules    
     Installer_With_Pip()

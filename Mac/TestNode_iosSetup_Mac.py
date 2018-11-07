@@ -1,13 +1,56 @@
 # Copyright 2016, Automation Solutionz
 # ---
 
-import subprocess
+
 import os
 import sys
-import commands
+import subprocess
+import getpass
 
 install_str = "sudo pip install -U pip"
-apt_get_str = "sudo apt-get install"
+sudo_pass = ''
+logfile = "TestNode_iOS_Logs.log"
+
+try:
+    import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
+except:
+    print "Module Commands is missing. I'll attempt to install it manually. \n"
+    import commands  # Try to import again
+
+
+# Import local modules
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
+from Crossplatform import CommonUtils
+
+def check_if_ran_with_sudo():
+    global sudo_pass
+    sudo_pass = None
+    if os.getuid() == 0:
+        return True
+    else:
+        max_try = 3
+        counter=0
+        have_pass = False
+        while counter != max_try:
+            print "This program needs sudo access.  please provide sudo password"
+            global passwd
+            passwd = getpass.getpass()
+            print "checking to see if you have entered correct sudo"
+            command = "echo 'sudo check'"
+            p = os.system('echo "%s"|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
+            if p == 256:
+                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                counter = counter+1
+            else:
+                print "sudo authentication verified!"
+                have_pass = True
+                break
+        if have_pass == False:
+            return False
+        else:
+            sudo_pass = passwd
+            return True
+
 
 
 # Installation function
@@ -18,8 +61,7 @@ def install(type="", module_name="", module_version=None, cmd=""):
         command = "%s %s" % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
-    elif type == "apt-get":
-        command = "%s %s --yes" % (apt_get_str, module_name)
+
     else:
         command = cmd
     print "Installing: %s " % command
@@ -28,84 +70,111 @@ def install(type="", module_name="", module_version=None, cmd=""):
     print (78 * '-')
 
 
-def Installer_With_Pip():
-    # install pip
-    try:
-        install(cmd="sudo easy_install pip")
-    except:
-        print "Unable to install pip"
+
+
+
 
 
 def basic_installation():
-    # brew
-    try:
-        install(
-            cmd='/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-    except:
-        print "Unable to install brew"
+
 
     # node
     try:
+        sys.stdout.write("Installing: node\n", True)
+        print "Installing: node"
         install(cmd="brew install node")
     except:
+        sys.stdout.error("\tAn error occured. See log file\n")
         print "Unable to install node"
 
     # ideviceinstaller
     try:
+        sys.stdout.write("Installing: ideviceinstaller\n", True)
+        print "Installing: ideviceinstaller"
         install(cmd="brew install ideviceinstaller")
     except:
+        sys.stdout.error("\tAn error occured. See log file\n")
         print "Unable to install ideviceinstaller"
+
+    # libtool
+    try:
+        sys.stdout.write("Installing: autoconf automake libtool\n", True)
+        print "Installing: autoconf automake libtool"
+        install(cmd="brew install autoconf automake libtool")
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n")
+        print "Unable to install libtool"
+
+    # pkg-config
+    try:
+        sys.stdout.write("Installing: pkg-config\n", True)
+        print "Installing: pkg-config"
+        install(cmd="brew reinstall pkg-config")
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n")
+        print "Unable to reinstall pkg-config"
+
+
+    # appium
+    try:
+        sys.stdout.write("Installing: appium\n", True)
+        print "Installing: appium"
+        install(cmd="npm install -g appium")
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n")
+        print "Unable to install appium"
+
+    # libimobiledevice
+    try:
+        sys.stdout.write("Installing: libimobiledevice\n", True)
+        print "Installing: libimobiledevice"
+        install(cmd="brew unlink libimobiledevice")
+        install(cmd="brew install libimobiledevice --HEAD")
+        install(cmd="brew link libimobiledevice")
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n")
+        print "Unable to install libimobiledevice"
 
     # carthage
     try:
+        sys.stdout.write("Installing: carthage\n", True)
+        print "Installing: carthage"
         install(cmd="brew install carthage")
     except:
         print "Unable to install carthage"
 
-    # appium
+
+
+def main(rungui = False):
+    global sudo_pass
+    if rungui: # GUI will only run this if it already has the password, and it's verified
+        sudo_pass = rungui # Save password
+    else:
+        # Make sure we have root privleges
+        if check_if_ran_with_sudo():
+            print "Running with root privs\n"
+        else:
+            print "Error - Need root privleges\n"
+            quit()
+
+    # Setup logging
+    CommonUtils.Logger_Setup(logfile, rungui)
+
     try:
-        install(cmd="npm install -g appium")
+        xcode_path = subprocess.Popen(['xcrun', 'simctl', 'help', 'help'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        xcode_path = xcode_path.communicate()
+        xcode_path = str(xcode_path[0]).strip()
+        if xcode_path.find("Usage:") != -1:
+            basic_installation()
+            sys.stdout.write("Installation complete please see log files\n", True)
+        else:
+            sys.stdout.error("\tCouldn't find xcode. You must install xcode manually first and launch it at least one time to make sure installation is completed.\n")
     except:
-        print "Unable to install appium"
+        sys.stdout.error("\tCouldn't find xcode. You must install xcode manually first and launch it at least one time to make sure installation is completed.\n")
 
-    # carthage
-    try:
-        install(cmd="brew unlink libimobiledevice")
-        install(cmd="brew install libimobiledevice --HEAD")
-    except:
-        print "Unable to install libimobiledevice"
-
-
-class Logger(object):
-    def __init__(self):
-        self.terminal = sys.stdout
-        self.log = open("TestNode_iOS_Mac_Installer_Logs.log", "w")
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-
-    def close(self):
-        self.log.close()
-
-
-def main():
-    sys.stdout = Logger()
-
-    ## Install PIP
-    print (78 * '-')
-    print ('Python PIP Installation')
-    print (78 * '-')
-    os.system("sudo add-apt-repository universe")
-    os.system("sudo apt-get update --yes")
-    install(type="apt-get", module_name="python-pip")
-
-    ## Install PIP modules
-    Installer_With_Pip()
-
-    basic_installation()
-
-    sys.stdout.close()
+    sys.stdout.write("Installation complete please see log files\n", True)
+    # Clean up logger, and reinstate STDOUT/ERR
+    CommonUtils.Logger_Teardown(logfile)
 
 
 if __name__ == "__main__":

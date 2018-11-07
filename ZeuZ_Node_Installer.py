@@ -2,6 +2,10 @@
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/tkinter.pdf
 # Written by Lucas Donkers
 # Function: Front-end to Windows, Mac, and Linux installer scripts
+import getpass,commands
+
+sudo_pass = ''
+install_str = "pip install -U pip"
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -11,6 +15,58 @@ def detect_admin():
         try: output = subprocess.check_output(command, shell=True) # Causes an exception if we can't run
         except: return False
     return True
+
+def check_if_ran_with_sudo():
+    global sudo_pass
+    sudo_pass = None
+    if os.getuid() == 0:
+        return True
+    else:
+        max_try = 3
+        counter=0
+        have_pass = False
+        while counter != max_try:
+            print "This program needs sudo access.  please provide sudo password"
+            global passwd
+            passwd = getpass.getpass()
+            print "checking to see if you have entered correct sudo"
+            command = "echo 'sudo check'"
+            p = os.system('echo "%s"|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
+            if p == 256:
+                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                counter = counter+1
+            else:
+                print "sudo authentication verified!"
+                have_pass = True
+                break
+        if have_pass == False:
+            return False
+        else:
+            sudo_pass = passwd
+            return True
+
+# Installation function
+def install(type="", module_name="", module_version=None, cmd=""):
+    command = ""
+
+    if type == "pip":
+        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
+        if module_version:
+            command = "%s==%s" % (command, module_version)
+
+    elif type == "sudo":
+        command = 'echo "%s" | sudo -S %s' % (sudo_pass, cmd) # Run command with sudo
+    else:
+        command = cmd # Run command exactly as provided
+
+    print "Installing: %s " % command.replace(sudo_pass, '*****')
+
+    status, output = commands.getstatusoutput(command)
+    if status > 0:
+        if module_name in ('numpy', 'selenium', 'Appium-Python-Client'): return # Don't show an error on these items - they often fail and it's not a concern
+        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+    print output
+    print (78 * '-')
 
 def get_required_mods():
     print "Tkinter is not installed. This is required to start the graphical interface. I'll try to install it, but you may need to do this manualy. Please enter the root password if asked.\n"
@@ -40,7 +96,33 @@ def get_required_mods():
             print "Failed to install. Please run: sudo apt-get -y install python-tk python-pil python-pil.imagetk python-requests"
             raw_input('Press ENTER to exit')
             quit()
+    elif sys.platform == 'darwin':
+        try:
+            global sudo_pass
+            if check_if_ran_with_sudo():
+                print "Running with root privs\n"
+            else:
+                print "Error - Need root privleges\n"
+                quit()
 
+            install(type="sudo", cmd="easy_install pip")
+
+            install(type="pip", module_name="--upgrade pip")
+
+            # Download pip directly, and run its installer
+            #install(cmd="wget https://bootstrap.pypa.io/get-pip.py")
+            #install(type="sudo", cmd="python get-pip.py")
+
+            install(type="sudo", cmd="pip install requests")
+            install(type="sudo", cmd="pip install image")
+            install(type="sudo", cmd="pip install tzlocal")
+
+
+
+        except:
+            print "Failed to install for mac. Please install the required modules"
+            raw_input('Press ENTER to exit')
+            quit()
     else:
         print "Could not automatically install required modules"
         raw_input('Press ENTER to exit')

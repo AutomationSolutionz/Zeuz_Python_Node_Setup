@@ -7,8 +7,7 @@ import getpass
 try:
     import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
 except:
-    print "Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n"
-    print subprocess.check_output('sudo apt-get install python-cmd2', shell=True)
+
     import commands  # Try to import again
 
 # Import local modules
@@ -24,8 +23,8 @@ brew_str = "/usr/local/bin/brew install"
 
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
-                   "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml", "gi",
-                   "xlrd","hashlib","tzlocal"]
+                   "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml",
+                   "xlrd","tzlocal"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'geckodriver']
 
@@ -79,7 +78,7 @@ def install(type="", module_name="", module_version=None, cmd=""):
     status, output = commands.getstatusoutput(command)
     if status > 0:
         if module_name in ('numpy', 'selenium', 'Appium-Python-Client'): return # Don't show an error on these items - they often fail and it's not a concern
-        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+        sys.stdout.error("\t See log file\n")  # Print to terminal window, and log file
     print output
     print (78 * '-')
 
@@ -112,6 +111,17 @@ def Installer_With_Pip():
         except:
             sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
 
+def Install_Hashlib():
+    try:
+        sys.stdout.write("Installing: Hashlib\n", True)
+        cmd = "easy_install hashlib"  # !!! Not working. Not sure why - repository exists
+        output = os.system(cmd)
+
+        print output
+        print (78 * '-')
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+        print "Unable to install hashlib"
 
 def Install_Chrome_Drivers():
     Install_Chrome_Browser()
@@ -197,8 +207,9 @@ def main(rungui = False):
     Install_Brew()
     Installer_With_Brew()
 
-    Install_Pip()
+    #Install_Pip()
     Installer_With_Pip()
+    Install_Hashlib()
     Install_Chrome_Drivers()
     Install_Firefox_Drivers()
 
