@@ -161,10 +161,10 @@ def main(rungui = False):
     CommonUtils.Logger_Setup(logfile, rungui)
 
     try:
-        xcode_path = subprocess.Popen(['xcrun', 'simctl', 'help', 'help'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        xcode_path = subprocess.Popen(['xcrun', 'simctl'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
         xcode_path = xcode_path.communicate()
         xcode_path = str(xcode_path[0]).strip()
-        if xcode_path.find("Usage:") != -1:
+        if xcode_path.find("Prints the usage for a given subcommand") != -1:
             basic_installation()
             sys.stdout.write("Installation complete please see log files\n", True)
         else:
@@ -172,7 +172,6 @@ def main(rungui = False):
     except:
         sys.stdout.error("\tCouldn't find xcode. You must install xcode manually first and launch it at least one time to make sure installation is completed.\n")
 
-    sys.stdout.write("Installation complete please see log files\n", True)
     # Clean up logger, and reinstate STDOUT/ERR
     CommonUtils.Logger_Teardown(logfile)
 

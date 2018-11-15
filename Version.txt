@@ -1,6 +1,6 @@
 [Python Setup]
-version = 2.9
+version = 3.0
 [Release Date]
-date= 2018-10-11
+date= 2018-11-15
 [Release Note]
-Note = iOS setup fixes and improvements
+Note = iOS setup fixes
