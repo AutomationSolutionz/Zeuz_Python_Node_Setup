@@ -1,6 +1,6 @@
 [Python Setup]
-version = 3.0
+version = 3.1
 [Release Date]
-date= 2018-11-15
+date= 2019-04-01
 [Release Note]
-Note = iOS setup fixes
+Note = new module futures installed for dynamic python files update

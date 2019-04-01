@@ -80,10 +80,10 @@ def get_npm_url():
     # Find url and filename
     found = False
     for line in wp: # For each line in the webpage
-        if 'Binaries (x86/x64)' in line:
+        if 'Linux Binaries (x64)' in line:
             if os[sys.platform].lower() in line.lower():
                 found = True
-        elif found and '32-bit' in line:
+        elif found and '64-bit' in line:
             found = False
             url = line.split('href')[1]
             url = url.split('"')[1]
