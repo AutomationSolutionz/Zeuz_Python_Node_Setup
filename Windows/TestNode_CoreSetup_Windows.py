@@ -91,7 +91,7 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
 def Installer_With_Pip():
     #upgrade pip itself
     
-    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client"]
+    pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml","xlrd","SpeechRecognition","python-dateutil","Appium-Python-Client","futures"]
     pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "winshell"]
     
     for each in pip_module_list:

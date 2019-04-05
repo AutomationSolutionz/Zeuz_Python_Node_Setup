@@ -24,7 +24,7 @@ brew_str = "/usr/local/bin/brew install"
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
                    "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client", "lxml",
-                   "xlrd","tzlocal"]
+                   "xlrd","tzlocal","futures"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'geckodriver']
 
