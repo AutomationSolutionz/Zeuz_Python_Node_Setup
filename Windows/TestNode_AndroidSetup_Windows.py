@@ -540,7 +540,7 @@ def Install_NodeJS(upgrade=False):
         #VisualcppBuildTools()
         #VisualCpythonCompiler()
         base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
-        file_name = 'node-v9.0.0-x64.msi'
+        file_name = 'node-v10.15.3-x64.msi'
         installer_path  = Download_File(base_url, file_name)
         print "Installing NodeJS silently from: %s"%installer_path
         command = 'msiexec.exe /i "%s"  /passive' %(installer_path)
