@@ -93,7 +93,7 @@ def Installer_With_Pip():
     
     pip_module_list = ["pip","psutil", "clint","pillow", "pyserial", "numpy","imutils", "simplejson","urllib3","selenium",
                        "uiautomator","requests", "poster","wheel" , "python3-xlib", "pyautogui", "lxml","xlrd","SpeechRecognition",
-                       "python-dateutil","Appium-Python-Client","futures","xlwings","image", "tzlocal","pyautocad"]
+                       "python-dateutil","Appium-Python-Client","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2"]
     pip_module_win_only = ["pythonnet","wmi","pyautoit","pywinauto", "winshell"]
     
     for each in pip_module_list:
