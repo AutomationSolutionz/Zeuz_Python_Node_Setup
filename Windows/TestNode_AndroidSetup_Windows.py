@@ -57,7 +57,7 @@ Downloaded_Path = expanduser("~")+os.sep + "Downloads"
 Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
 logfile = "TestNode_Android_Logs.log"
 
-current_script_path = sys.path[0]
+current_script_path = '%s'%(sys.path[0])
 
 def cmdline(command):
     process = Popen(
