@@ -1,6 +1,6 @@
 [Python Setup]
-version = 3.4
+version = 3.5
 [Release Date]
-date= 2019-05-30
+date= 2019-06-06
 [Release Note]
-Note = PyPDF2 added
+Note = Certificate added to installer

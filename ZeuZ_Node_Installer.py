@@ -5,7 +5,7 @@
 import getpass,commands
 
 sudo_pass = ''
-install_str = "pip install -U pip"
+install_str = "pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U pip"
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -79,10 +79,13 @@ def get_required_mods():
                 quit()
             # Install
             # Note: Tkinter is not available through pip nor easy_install, we assume it was packaged with Python
-            print subprocess.check_output('python -m pip install setuptools -U')
-            print subprocess.check_output('pip download pillow') # Must be done before installing or Image and ImageTk will fail
-            print subprocess.check_output('python -m pip install pillow -U')
-            print subprocess.check_output('python -m pip install requests -U')
+            print subprocess.check_output('python -m pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org oauthlib -vvv')
+            
+            #python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow
+            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org setuptools -U')
+            print subprocess.check_output('pip download --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow') # Must be done before installing or Image and ImageTk will fail
+            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow -U')
+            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests -U')
         except:
             print "Failed to install. Please run: pip download pillow & pip install pillow"
             raw_input('Press ENTER to exit')
@@ -113,9 +116,9 @@ def get_required_mods():
             #install(cmd="wget https://bootstrap.pypa.io/get-pip.py")
             #install(type="sudo", cmd="python get-pip.py")
 
-            install(type="sudo", cmd="pip install requests")
-            install(type="sudo", cmd="pip install image")
-            install(type="sudo", cmd="pip install tzlocal")
+            install(type="sudo", cmd="pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests")
+            install(type="sudo", cmd="pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org image")
+            install(type="sudo", cmd="pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org tzlocal")
 
 
 

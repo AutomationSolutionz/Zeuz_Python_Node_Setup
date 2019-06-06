@@ -26,10 +26,10 @@ def get_required_mods():
                 quit()
             # Install
             # Note: Tkinter is not available through pip nor easy_install, we assume it was packaged with Python
-            print subprocess.check_output('python -m pip install setuptools -U')
-            print subprocess.check_output('python -m pip install requests -U')
-            print subprocess.check_output('python -m pip download pillow') # Must be done before installing or Image and ImageTk will fail
-            print subprocess.check_output('python -m pip install pillow -U')
+            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org setuptools -U')
+            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests -U')
+            print subprocess.check_output('python -m pip download --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow') # Must be done before installing or Image and ImageTk will fail
+            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow -U')
         except:
             print "Failed to install. Please run: pip download setuptools"
             raw_input('Press ENTER to exit')
@@ -63,7 +63,7 @@ except:
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
 
-install_str = "python -m pip install -U"
+install_str = "python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U"
 logfile = "TestNode_Core_Logs.log"
 
 
