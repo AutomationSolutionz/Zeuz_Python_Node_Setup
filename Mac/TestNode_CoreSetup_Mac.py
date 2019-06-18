@@ -111,17 +111,29 @@ def Installer_With_Pip():
         except:
             sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
 
-def Install_Hashlib():
-    try:
-        sys.stdout.write("Installing: Hashlib\n", True)
-        cmd = "easy_install hashlib"  # !!! Not working. Not sure why - repository exists
-        output = os.system(cmd)
 
-        print output
-        print (78 * '-')
+
+def Install_Easy_Installer():
+    try:
+        
+        items_to_install = ['hashlib','https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
+        
+        for each in items_to_install:
+            try:
+                sys.stdout.write("Installing: %s\n"%each, True)
+                cmd = "easy_install %s"%each  # !!! Not working. Not sure why - repository exists
+                output = os.system(cmd)
+                print output
+                print (78 * '-')
+            except:
+                sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+                print "Unable to install %s"%each
+                
     except:
         sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-        print "Unable to install hashlib"
+        print "Unable to install %s"%each
+
+
 
 def Install_Chrome_Drivers():
     Install_Chrome_Browser()
@@ -206,10 +218,10 @@ def main(rungui = False):
     # Install
     Install_Brew()
     Installer_With_Brew()
-
+    Install_Easy_Installer()
     #Install_Pip()
     Installer_With_Pip()
-    Install_Hashlib()
+
     Install_Chrome_Drivers()
     Install_Firefox_Drivers()
 

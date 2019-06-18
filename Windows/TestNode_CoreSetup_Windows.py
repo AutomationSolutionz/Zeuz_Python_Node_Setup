@@ -113,12 +113,13 @@ def Installer_With_Pip():
         except:
             sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
-def Installer_With_Exe():
+def Installer_With_Easy_Install():
     
     list_of_exe_link = [
                         "http://people.csail.mit.edu/hubert/pyaudio/packages/pyaudio-0.2.8.py27.exe",
                         "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pywin32-221.win32-py2.7.exe",
-                        "hashlib"
+                        "hashlib",
+                        "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip"
                         ]
     for each in list_of_exe_link:
         try:
@@ -348,9 +349,9 @@ def main(rungui = False):
 
     # Install
     if Check_Pre_Req(rungui):
+        Installer_With_Easy_Install()
         Installer_With_Pip()
         Installer_With_MSI()
-        Installer_With_Exe()
         Selenium_Driver_Files_Windows()
         download_dlls_for_windows_automation_and_extract()
 

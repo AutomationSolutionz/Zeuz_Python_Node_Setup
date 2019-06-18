@@ -172,6 +172,31 @@ def Install_Firefox_Drivers():
     install(type="sudo", cmd="ln -f -s /usr/local/share/geckodriver /usr/bin/geckodriver")
     install(cmd='rm geckodriver-%s-linux64.tar.gz' % (latest_version))
 
+
+
+
+def Install_Easy_Installer():
+    try:
+        
+        items_to_install = ['hashlib','https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
+        
+        for each in items_to_install:
+            try:
+                sys.stdout.write("Installing: %s\n"%each, True)
+                cmd = "easy_install %s"%each  # !!! Not working. Not sure why - repository exists
+                output = os.system(cmd)
+                print output
+                print (78 * '-')
+            except:
+                sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+                print "Unable to install %s"%each
+                
+    except:
+        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+        print "Unable to install %s"%each
+
+
+
 def Install_PIP():
      # we should not have to do this ...
     print (78 * '-')
@@ -248,6 +273,7 @@ def main(rungui = False):
     # Perform installation
     OS_Version()
     Installer_With_Apt_get()
+    Install_Easy_Installer()
     Installer_With_Pip()
     Install_Chrome_Drivers()
     Install_Firefox_Drivers()
