@@ -14,13 +14,27 @@ except:
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
 
+
+# Commands that help with installation
+
+global logfile
+global install_str_pip
+global install_str_easy_install
+global brew_str
+global easy_instal_list
+global pip_module_list
+global pip_only_mac
+global brew_module_list
+
+
 sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
-# Commands that help with installation
-install_str = "pip install -U pip"
+install_str_pip = "pip install -U pip"
+install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
+easy_instal_list = ['https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
                    "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
@@ -62,8 +76,13 @@ def check_if_ran_with_sudo():
 def install(type="", module_name="", module_version=None, cmd=""):
     command = ""
 
-    if type == "pip":
-        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
+    if type == "easy_install":
+        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str_easy_install, module_name)
+        if module_version:
+            command = "%s==%s" % (command, module_version)
+                    
+    elif type == "pip":
+        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str_pip, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
     elif type == "brew":
@@ -114,24 +133,15 @@ def Installer_With_Pip():
 
 
 def Install_Easy_Installer():
-    try:
-        
-        items_to_install = ['hashlib','https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
-        
-        for each in items_to_install:
-            try:
-                sys.stdout.write("Installing: %s\n"%each, True)
-                cmd = "easy_install %s"%each  # !!! Not working. Not sure why - repository exists
-                output = os.system(cmd)
-                print output
-                print (78 * '-')
-            except:
-                sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-                print "Unable to install %s"%each
-                
-    except:
-        sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-        print "Unable to install %s"%each
+    for each in easy_instal_list:
+        try:
+            sys.stdout.write("Installing: %s\n" % each, True)  # Print to terminal window, and log file
+            install(type="easy_install", module_name=each)
+        except:
+            sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
+            print "Prolblem occured while installing %s" % each
+
+
 
 
 
