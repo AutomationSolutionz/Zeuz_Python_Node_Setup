@@ -3,6 +3,8 @@
 
 import os, os.path, glob, sys, shutil
 from Crossplatform import CommonUtils
+import winshell
+from win32com.client import Dispatch
 
 try: import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
 except:
@@ -58,6 +60,32 @@ def move_zeuznode():
         dst = str(os.path.join(homedir, 'Desktop'))
         if os.path.exists(os.path.join(dst, dirname)): shutil.rmtree(os.path.join(dst, dirname), ignore_errors = True) # Remove desktop installation if previously done, because it will cause a failure if it exists
         shutil.move(dirname, dst)
+        #create a shortcut
+        try:
+            Node_file = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node" + os.sep + "ZeuZ_Node.py"
+
+            desktop = winshell.desktop()
+            path = os.path.join(desktop, "ZeuZ_Node.lnk")
+            target = Node_file
+            current_script_path = '%s'%(sys.path[0])
+            ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"zeuz.ico"
+            
+            
+            icon = ZeuZ_Icon_Path
+             
+            shell = Dispatch('WScript.Shell')
+            shortcut = shell.CreateShortCut(path)
+            shortcut.Targetpath = target
+            
+            shortcut.IconLocation = icon
+            shortcut.save()
+            
+        except:
+            sys.stdout.error("\n Unable to create ZeuZ Short Cut\n")
+            
+        
+        
+        
         return True
     except Exception, e:
         prints("\tError moving: %s\n" % e)

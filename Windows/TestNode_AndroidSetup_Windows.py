@@ -1,4 +1,5 @@
 # Copyright 2017, Automation Solutionz
+from __builtin__ import True
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -32,7 +33,9 @@ import _winreg as winreg
 # Import local modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
-
+import webbrowser
+import winshell
+from win32com.client import Dispatch
 
 #since nothing is able to refresh the command line calling directly, we will define the npm full path
 global npm_path
@@ -45,10 +48,18 @@ global Android_Build_Tools_Dir
 global Downloaded_Path
 global Temp_Tools_Dir
 global current_script_path
+global installer_jdk_file_part_1 
+global installer_jdk_file_part_2 
+global installer_jdk_file_part_3 
+global installer_jdk_file_name
+global install_node_file
+global android_studio_installer 
+
+# C:\Users\Shaon-PC\AppData\Local\Android\Sdk
 
 npm_path = os.environ["ProgramW6432"]+os.sep+ "nodejs"
 appium_path = os.getenv('APPDATA') + os.sep + "npm" + os.sep + "appium"
-Android_Home_Dir  =  expanduser("~")+os.sep + "Desktop" + os.sep +  "sdk"
+Android_Home_Dir  =  expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk"
 Android_Tools_bin_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
 Android_Tools_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
 Android_Platform_Tools_Dir = Android_Home_Dir + os.sep + "platform-tools"
@@ -58,6 +69,13 @@ Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
 logfile = "TestNode_Android_Logs.log"
 
 current_script_path = '%s'%(sys.path[0])
+#Updated Oct 26, 2019
+installer_jdk_file_part_1  = "jdk-8u231-windows-x64.sfx.part1.exe"
+installer_jdk_file_part_2  = "jdk-8u231-windows-x64.sfx.part2.rar"
+installer_jdk_file_part_3  = "jdk-8u231-windows-x64.sfx.part3.rar"
+installer_jdk_file_name = r"jdk-8u231-windows-x64.exe"
+install_node_file = 'node-v10.15.3-x64.msi'
+android_studio_installer = r"3.5.1.0/android-studio-ide-191.5900203-windows.exe"
 
 def cmdline(command):
     process = Popen(
@@ -262,28 +280,25 @@ def Install_JDK():
             #Download 3 parts of installer
             print "part 1 of 3"
             sys.stdout.write("Downloading JDK part 1 of 3 \n", True)
-            installer_file_part_1 = "jdk-8-144-windows-x64.sfx.part1.exe"
-            java_installer_path_1 = Download_File(base_url, installer_file_part_1)
+            java_installer_path_1 = Download_File(base_url, installer_jdk_file_part_1)
             print "part 2 of 3"
             sys.stdout.write("Downloading JDK part 2 of 3 \n", True)
-            installer_file_part_2 = "jdk-8-144-windows-x64.sfx.part2.rar"
-            java_installer_path_2 = Download_File(base_url, installer_file_part_2)
+            java_installer_path_2 = Download_File(base_url, installer_jdk_file_part_2)
             print "part 3 of 3"
             sys.stdout.write("Downloading JDK part 3 of 3 \n", True)
-            installer_file_part_3 = "jdk-8-144-windows-x64.sfx.part3.rar"
-            java_installer_path_3 = Download_File(base_url , installer_file_part_3)            
+            java_installer_path_3 = Download_File(base_url , installer_jdk_file_part_3)            
             
             #extracting file
             sys.stdout.write("Please wait while we extracting files silently...\n", True) # Print to terminal window, and log file
             print "Extracting files silently..."
-            silent_extract_command = "%s /s"%(Downloaded_Path + os.sep + installer_file_part_1)
+            silent_extract_command = "%s /s"%(Downloaded_Path + os.sep + installer_jdk_file_part_1)
             os.system(silent_extract_command)   
             sys.stdout.write("JDK Extraction completed\n", True)
             print "Extracting completed"
             
             print "We are installing java silently, please wait..."
             
-            jdk_exe_path = current_script_path + os.sep+ r"jdk-8u144-windows-x64.exe"
+            jdk_exe_path = current_script_path + os.sep+ installer_jdk_file_name
             silent_installer_command = "%s /s"%jdk_exe_path
             sys.stdout.write("Installing JDK silently from %s.  This will take some time...\n"%jdk_exe_path, True) # Print to terminal window, and log file
 
@@ -292,16 +307,18 @@ def Install_JDK():
             Check_If_JDK_Installed()
             sys.stdout.write("Cleaning up temp JDK installer files...\n", True) # Print to terminal window, and log file
             print "Cleaning up temp JDK installer files..."
-            Delete_File(Downloaded_Path + os.sep + installer_file_part_1)
-            Delete_File(Downloaded_Path + os.sep + installer_file_part_2)
-            Delete_File(Downloaded_Path + os.sep + installer_file_part_3)
-            Delete_File(current_script_path + os.sep + 'jdk-8u144-windows-x64.exe')
+            Delete_File(Downloaded_Path + os.sep + installer_jdk_file_part_1)
+            Delete_File(Downloaded_Path + os.sep + installer_jdk_file_part_2)
+            Delete_File(Downloaded_Path + os.sep + installer_jdk_file_part_3)
+            Delete_File(current_script_path + os.sep + installer_jdk_file_name)
             #setting java path
             JAVA_PATH()
             sys.stdout.write("JDK Install completed\n", True)
+            return True
         else:
             sys.stdout.write("JDK is already installed\n", True)
             print "JDK is already installed"
+            return True
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -309,6 +326,7 @@ def Install_JDK():
         print Error_Detail
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
         return False
+
 
 def Check_If_JDK_Installed():
     try:
@@ -397,22 +415,22 @@ def Android_SDK_PATH():
         #ANT_HOME
 
         sys.stdout.write("Setting ANT_HOME to Environmental variable\n", True)
-        ANT_HOME = Android_Home_Dir + os.sep + 'apache-ant-1.10.1' + os.sep + 'bin'
+        ANT_HOME = Downloaded_Path + os.sep + 'apache-ant-1.10.7' + os.sep + 'bin'
         Add_To_Path("ANT_HOME", ANT_HOME)
         #M2_HOME
 
         sys.stdout.write("Setting M2_HOME to Environmental variable\n", True)
-        M2_HOME = Android_Home_Dir + os.sep + "apache-maven-3.5.0"
+        M2_HOME = Downloaded_Path + os.sep + "apache-maven-3.6.2"
         Add_To_Path("M2_HOME", M2_HOME)      
         #M2
 
         sys.stdout.write("Setting maven to Environmental variable\n", True)
-        M2 = Android_Home_Dir + os.sep + "apache-maven-3.5.0" + os.sep + "bin"
+        M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
         Add_To_Path("M2", M2)   
         #M2 to PATH
 
         sys.stdout.write("Setting maven to PATH\n", True)
-        M2 = Android_Home_Dir + os.sep + "apache-maven-3.5.0" + os.sep + "bin"
+        M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
         Add_To_Path("PATH", M2)   
         
     except Exception, e:
@@ -422,78 +440,87 @@ def Android_SDK_PATH():
         print Error_Detail
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
         return False  
+
+
          
 def Android_SDK(upgrade=False):    
     try:
         sdk_check = Check_If_ANDROID_SDK_Installed()
         if sdk_check == False:
-            try:
-                sys.stdout.write("Downloading: Android SDK\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Please Download and Install Android Studio from https://developer.android.com/studio/")
+            sys.stdout.write("\nSet the environment variables accordingly")
+            webbrowser.open_new('https://developer.android.com/studio/')
 
-                base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
-                #Download 4 parts of installer
-                installer_file_part_1 = "sdk.part01.exe"
-                installer_file_part_2 = "sdk.part02.rar"
-                installer_file_part_3 = "sdk.part03.rar"
-                installer_file_part_4 = "sdk.part04.rar"
-                installer_file_part_5 = "sdk.part05.rar"
-    
- 
-                sys.stdout.write("part 1 of 5\n", True)
-                
-                android_installer_path_1 = Download_File(base_url, installer_file_part_1)
+            return False
 
-                sys.stdout.write("part 2 of 5\n", True)
-                android_installer_path_2 = Download_File(base_url, installer_file_part_2)
-
-                sys.stdout.write("part 3 of 5\n", True)
-                android_installer_path_3 = Download_File(base_url, installer_file_part_3)   
-
-                sys.stdout.write("part 4 of 5\n", True)
-                android_installer_path_4 = Download_File(base_url, installer_file_part_4)          
-
-                sys.stdout.write("part 5 of 5\n", True)
-                android_installer_path_5 = Download_File(base_url, installer_file_part_5)                      
-                #silent install
-                sys.stdout.write("Silently extracting android SDK package with ant and maven.  This can take 3-5 minutes.\n", True) # Print to terminal window, and log file 
-                time.sleep(3)
-                Kill_Process("adb.exe")
-                Extracted_Folder_Path =    Downloaded_Path + os.sep + "sdk"  
-                if os.path.exists(Extracted_Folder_Path) == True:
- 
-                    sys.stdout.write("Existing folder found.. will delete", True)
-                    shutil.rmtree(Extracted_Folder_Path)
-
-                sys.stdout.write("Silently extracting android SDK package with ant and maven.  This can take 3-5 minutes.", True)
-                
-                silent_extract_command = "%s /s"%(Downloaded_Path + os.sep +installer_file_part_1)
-                os.system(silent_extract_command)    
-                time.sleep(3)  
-                
-                sys.stdout.write("Moving SDK folder to desktop\n", True) # Print to terminal window, and log file
-                src_folder = current_script_path + os.sep + "sdk"  
-                des_folder = Android_Home_Dir
-                Move_and_Overwrite_Folder(src_folder, des_folder)
-                sys.stdout.write("Cleaning up temp android SDK files \n", True) # Print to terminal window, and log file
-                Delete_File(Downloaded_Path + os.sep +installer_file_part_1)
-                Delete_File(Downloaded_Path + os.sep +installer_file_part_2)
-                Delete_File(Downloaded_Path + os.sep +installer_file_part_3)
-                Delete_File(Downloaded_Path + os.sep +installer_file_part_4)
-                Delete_File(Downloaded_Path + os.sep +installer_file_part_5) 
-                
-            except Exception, e:
-                exc_type, exc_obj, exc_tb = sys.exc_info()        
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-                sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
-                print Error_Detail        
+            # try:
+            #     sys.stdout.write("Downloading: Android SDK\n", True) # Print to terminal window, and log file
+            #
+            #     base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
+            #     #Download 4 parts of installer
+            #     installer_file_part_1 = "sdk.part01.exe"
+            #     installer_file_part_2 = "sdk.part02.rar"
+            #     installer_file_part_3 = "sdk.part03.rar"
+            #     installer_file_part_4 = "sdk.part04.rar"
+            #     installer_file_part_5 = "sdk.part05.rar"
+            #
+            #
+            #     sys.stdout.write("part 1 of 5\n", True)
+            #
+            #     android_installer_path_1 = Download_File(base_url, installer_file_part_1)
+            #
+            #     sys.stdout.write("part 2 of 5\n", True)
+            #     android_installer_path_2 = Download_File(base_url, installer_file_part_2)
+            #
+            #     sys.stdout.write("part 3 of 5\n", True)
+            #     android_installer_path_3 = Download_File(base_url, installer_file_part_3)
+            #
+            #     sys.stdout.write("part 4 of 5\n", True)
+            #     android_installer_path_4 = Download_File(base_url, installer_file_part_4)
+            #
+            #     sys.stdout.write("part 5 of 5\n", True)
+            #     android_installer_path_5 = Download_File(base_url, installer_file_part_5)
+            #     #silent install
+            #     sys.stdout.write("Silently extracting android SDK package with ant and maven.  This can take 3-5 minutes.\n", True) # Print to terminal window, and log file
+            #     time.sleep(3)
+            #     Kill_Process("adb.exe")
+            #     Extracted_Folder_Path =    Downloaded_Path + os.sep + "sdk"
+            #     if os.path.exists(Extracted_Folder_Path) == True:
+            #
+            #         sys.stdout.write("Existing folder found.. will delete", True)
+            #         shutil.rmtree(Extracted_Folder_Path)
+            #
+            #     sys.stdout.write("Silently extracting android SDK package with ant and maven.  This can take 3-5 minutes.", True)
+            #
+            #     silent_extract_command = "%s /s"%(Downloaded_Path + os.sep +installer_file_part_1)
+            #     os.system(silent_extract_command)
+            #     time.sleep(3)
+            #
+            #     sys.stdout.write("Moving SDK folder to desktop\n", True) # Print to terminal window, and log file
+            #     src_folder = current_script_path + os.sep + "sdk"
+            #     des_folder = Android_Home_Dir
+            #     Move_and_Overwrite_Folder(src_folder, des_folder)
+            #     sys.stdout.write("Cleaning up temp android SDK files \n", True) # Print to terminal window, and log file
+            #     Delete_File(Downloaded_Path + os.sep +installer_file_part_1)
+            #     Delete_File(Downloaded_Path + os.sep +installer_file_part_2)
+            #     Delete_File(Downloaded_Path + os.sep +installer_file_part_3)
+            #     Delete_File(Downloaded_Path + os.sep +installer_file_part_4)
+            #     Delete_File(Downloaded_Path + os.sep +installer_file_part_5)
+            #
+            # except Exception, e:
+            #     exc_type, exc_obj, exc_tb = sys.exc_info()
+            #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            #     Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+            #     sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+            #     print Error_Detail
         
         else:
             sys.stdout.write("Android SDK for ZeuZ is already Installed.\n", True) # Print to terminal window, and log file
-        #setting SDK paths
-        Android_SDK_PATH()
-        #we need to  investigate this further     
-        #Upgrade_Android_SDK()
+            #setting SDK paths
+            Android_SDK_PATH()
+            #we need to  investigate this further
+            #Upgrade_Android_SDK()
+            return True
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -562,8 +589,7 @@ def Install_NodeJS(upgrade=False):
         #VisualcppBuildTools()
         #VisualCpythonCompiler()
         base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
-        file_name = 'node-v10.15.3-x64.msi'
-        installer_path  = Download_File(base_url, file_name)
+        installer_path  = Download_File(base_url, install_node_file)
         print "Installing NodeJS silently from: %s"%installer_path
         command = 'msiexec.exe /i "%s"  /passive' %(installer_path)
         os.system(command)
@@ -584,6 +610,7 @@ def Install_NodeJS(upgrade=False):
         print Error_Detail
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
         return False        
+     
  
 def Install_Appium(upgrade=False):   
     try:
@@ -626,6 +653,7 @@ def Install_Appium(upgrade=False):
             #print "Adding appium to the path"
             Add_To_Path("PATH",appium_path)
             sys.stdout.write("Completed appium installer...\n", True)
+            return True
             #print "Completed appium installer..."
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
@@ -797,7 +825,51 @@ def Update_Sys_Env_Variable(PATH_NAME,my_value):
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
         return False
 
+def Create_UI_Automator_Shortcut():
+    try:
+        # this function will create a short cut on user's desktop for UI Automator
+        desktop = winshell.desktop()
+        path = os.path.join(desktop, "UIAutomatorAndroidZeuZ.lnk")
+        target = Android_Tools_bin_Dir+os.sep+"uiautomatorviewer.bat"
+        
+        shell = Dispatch('WScript.Shell')
+        shortcut = shell.CreateShortCut(path)
+        shortcut.Targetpath = target
+        shortcut.save()
+        return True
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail)
+        return False
+
+def Create_ZeuZ_Node_Shortcut():
+    try:
+        # this function will create a short cut on user's desktop for UI Automator
+        desktop = winshell.desktop()
+        path = os.path.join(desktop, "UIAutomatorAndroidZeuZ.lnk")
+        target = Android_Tools_bin_Dir+os.sep+"uiautomatorviewer.bat"
+        
+        shell = Dispatch('WScript.Shell')
+        shortcut = shell.CreateShortCut(path)
+        shortcut.Targetpath = target
+        shortcut.save()
+        return True
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail)
+        return False
+
+
+
+
+
 def main(rungui = False):
+
+
 
     if not rungui: # GUI elevates already, so no need to do it again
         # If run in Windows, elevate permissions 
@@ -812,14 +884,44 @@ def main(rungui = False):
     # Install
     if Check_Pre_Req():
 
-        Install_JDK()
+        sys.stdout.error("\n 1. Please note that if you have duplicate JDK or newer than 1.8 JAVA Appium will not work.\n")
+        sys.stdout.error("\n 2. You must be logged in as Admin.  If you run as admin, appium installer will NOT WORK.\n")
+        sys.stdout.error("\n 3. If you have spaces in your user name, Appium will not work.  Create new user with admin permission with no spaces.\n")
+        sys.stdout.error("\n 4. Make sure you uninstall all other Java versions and remove any java version from Environmental Variable.\n")   
+        sys.stdout.error("\n 5. We will download a known JDK version (JDK 1.8) that is compatible and install it for you.\n")  
+        sys.stdout.error("\n 6. If you have an older Android Studio. Make sure you upgrade it to latest before running this.\n")  
+        Java_Installer = Install_JDK()
+        
+        if Java_Installer == False:
+            sys.stdout.error("\nWe were unable to install JDK 1.8. Please install JDK 1.8 manually and run again")
+           
+            return False
+            
 
-        Android_SDK()
-
-        Install_Appium()
+        Android_Studio = Android_SDK()
+        if Android_Studio == False:
+            sys.stdout.error("\nAndroid Studio is not installed.")
+            sys.stdout.error("\n 1. Download and Install Android Studio.")
+            sys.stdout.error("\n 2. You must run Android Studio once.  It will download additional tools for Appium to work.")
+            sys.stdout.error("\n 3. Quit this installer and close all other programs.")
+            sys.stdout.error("\n 4. Run Android Studio and start a blank project.")
+            sys.stdout.error("\n 5. Wait for all Android Studio components to finish download and install.")
+            sys.stdout.error("\n 6. You must Quit ZeuZ Node Installer and Re-Run Android Setup.")
+            sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai")
+            return False
+        
+        
+        Appium_Install_Result = Install_Appium()
+        if Appium_Install_Result == False:
+            sys.stdout.error("\nWe were unable to install Appium.")
+            sys.stdout.error("\n 1. Make sure you do not have duplicate java installer.  Appium works only with JDK 1.8")
+            sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai")
+            return False            
+        
 
     # Clean up logger, and reinstate STDOUT/ERR
     CommonUtils.Logger_Teardown(logfile)
+
 
 if __name__=="__main__":
 
