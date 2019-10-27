@@ -38,7 +38,7 @@ easy_instal_list = ['https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/ar
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
                    "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
-                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2","locustio", "realbrowserlocusts"]
+                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2","locustio", "realbrowserlocusts","pyshortcuts"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'geckodriver']
 

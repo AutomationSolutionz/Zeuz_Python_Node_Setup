@@ -23,7 +23,7 @@ logfile = "TestNode_Core_Logs.log"
 apt_get_module_list = ["python-pip", "python-tk", "python-setuptools", "libxss1", "libappindicator1", "libindicator7", "python-dateutil", "python-xlib"]
 pip_module_list = ["pip", "psutil", "pillow","pyserial", "numpy","imutils", "simplejson","urllib3","selenium","uiautomator","requests", "poster","wheel", 
                    "pyautogui", "Appium-Python-Client", "lxml", "gi","xlrd", "pyscreenshot","hashlib","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2",
-                   "locustio", "realbrowserlocusts"]
+                   "locustio", "realbrowserlocusts","pyshortcuts"]
 
 # Commands that help with installation
 install_str = "pip install -U pip"
