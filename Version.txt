@@ -1,6 +1,6 @@
 [Python Setup]
-version = 4.0
+version = 4.1
 [Release Date]
-date= 2019-10-26
+date= 2019-10-28
 [Release Note]
-Note = Updated Android Studio And JDK Installer,icons
+Note = pip fix for windows

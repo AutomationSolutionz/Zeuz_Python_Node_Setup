@@ -79,6 +79,12 @@ def get_required_mods():
                 quit()
             # Install
             # Note: Tkinter is not available through pip nor easy_install, we assume it was packaged with Python
+            #python on some windows do not have pip 
+            
+            
+            print subprocess.check_output('python -m ensurepip --default-pip')
+            
+
             print subprocess.check_output('python -m pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org oauthlib -vvv')
             
             #python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow
