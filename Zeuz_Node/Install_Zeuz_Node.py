@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # Function: Download and installs Zeuz Node software
-
 import os, os.path, glob, sys, shutil
 from Crossplatform import CommonUtils
 
-try: import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
-except:
+try: import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
+except Exception as e:
     import subprocess
-    print "Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n"
-    print subprocess.check_output('sudo apt-get install python-cmd2', shell = True)
-    import commands # Try to import again
+    print("Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n")
+    print(subprocess.check_output('sudo apt-get install python-cmd2', shell = True))
+    import subprocess # Try to import again
 
 
 node_sw_url = 'https://github.com/AutomationSolutionz/Zeuz_Python_Node/archive/master.zip' # URL pointing to Zeuz Node
@@ -40,7 +39,22 @@ def unzip_pkg(filename):
     else:
         prints("\tError unzipping\n")
         return False
-    
+
+def create_shortcuts(shortcut_name, target_exe_path, startin, icon_path):
+    import winshell
+    from win32com.client import Dispatch
+
+    if startin is None:
+        startin = winshell.desktop()
+
+    shell = Dispatch('WScript.Shell')
+    shortcut_file = os.path.join(winshell.desktop(), shortcut_name + '.lnk')
+    shortcut = shell.CreateShortCut(shortcut_file)
+    shortcut.Targetpath = target_exe_path
+    shortcut.WorkingDirectory = startin
+    shortcut.IconLocation = icon_path
+    shortcut.save()
+
 def move_zeuznode():
     try:
         # Find unpacked zeuz node directory and rename it
@@ -61,19 +75,26 @@ def move_zeuznode():
         #create a shortcut
         try:
             from pyshortcuts import make_shortcut
+
             Node_file = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node" + os.sep + "ZeuZ_Node.py"
             target = Node_file
             current_script_path = '%s'%(sys.path[0])
             ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"zeuz.ico"
-            make_shortcut(target, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
-        except:
+            if sys.platform == 'win32':
+                create_shortcuts(shortcut_name="Zeuz Node",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
+            else:
+                make_shortcut(target, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
+
+
+        except Exception as e:
+            print("Shortcut Exception: ", e)
             sys.stdout.error("\n Unable to create ZeuZ Short Cut\n")
             
         
         
         
         return True
-    except Exception, e:
+    except Exception as e:
         prints("\tError moving: %s\n" % e)
         return False
 

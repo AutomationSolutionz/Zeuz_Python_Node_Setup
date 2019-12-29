@@ -1,6 +1,6 @@
 # Function: Contains functions and variables used amongst the various platform installers
 
-import commands, sys, shutil, os, os.path
+import subprocess, sys, shutil, os, os.path
 # Do not import "requests" here - Causes Mac core install to fail
 
 # Global variables
@@ -25,12 +25,12 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
         command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
-        print "Installing: %s " %command
+        print("Installing: %s " %command)
     
     # Install with apt (with sudo)
     elif type == "apt-get":
         command = 'echo "%s" | sudo -S %s %s --yes' % (sudo_pass, apt_get_str, module_name)
-        print "Installing: %s " %command
+        print("Installing: %s " %command)
     
     # Run command as root
     elif type == "sudo":
@@ -39,13 +39,13 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
     # Run command as regular user
     else:
         command = cmd # Run command exactly as provided
-        print "Running: %s " % command.replace(sudo_pass, '*****')
+        print("Running: %s " % command.replace(sudo_pass, '*****'))
 
-    status, output = commands.getstatusoutput(command)
-    print output
-    print "\n"
-    print (78 * '-')
-    print "\n"
+    status, output = subprocess.getstatusoutput(command)
+    print(output)
+    print("\n")
+    print((78 * '-'))
+    print("\n")
     return output
 
 
@@ -80,16 +80,16 @@ def check_if_ran_with_sudo():
         counter=0
         have_pass = False
         while counter != max_try:
-            print "This program needs sudo access.  please provide sudo password"
+            print("This program needs sudo access.  please provide sudo password")
             passwd = getpass.getpass()
-            print "checking to see if you have entered correct sudo"
+            print("checking to see if you have entered correct sudo")
             command = "echo 'sudo check'"
             p = os.system('echo %s|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
             if p == 256:
-                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                print("You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1))
                 counter = counter+1
             else:
-                print "sudo authentication verified!"
+                print("sudo authentication verified!")
                 have_pass = True
                 break    
         if have_pass == False:
@@ -185,7 +185,7 @@ def unzip(zipFilePath, destDir = ''):
         zfile = zipfile.ZipFile(zipFilePath)
         if destDir and not os.path.exists(destDir): os.mkdir(destDir) # 
     
-        print "Unzipping %s to %s" % (zipFilePath, destDir)
+        print("Unzipping %s to %s" % (zipFilePath, destDir))
         for name in zfile.namelist():
             (dirName, fileName) = os.path.split(name)
     
@@ -203,8 +203,8 @@ def unzip(zipFilePath, destDir = ''):
                 fd.close()
         zfile.close()
         return True
-    except Exception, e:
-        print "Error unzipping: %s" % e
+    except Exception as e:
+        print("Error unzipping: %s" % e)
         return False
 
 def Download_File(url, filename = ''):
@@ -253,7 +253,7 @@ def Download_File(url, filename = ''):
         
         if os.sep not in filename: filename = os.path.join(os.getcwd(), filename)
         return filename
-    except Exception, e:
-        print "Error downloading: %s" % e
+    except Exception as e:
+        print("Error downloading: %s" % e)
         return False
 

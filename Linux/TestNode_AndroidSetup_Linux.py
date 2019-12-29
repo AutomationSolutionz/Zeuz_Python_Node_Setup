@@ -3,24 +3,26 @@
 # ---
 
 import subprocess, os, sys, os.path, glob
-try: import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
+try: import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
 except:
-    print "Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n"
-    print subprocess.check_output('sudo apt-get install python-cmd2', shell = True)
-    import commands # Try to import again
+    print("Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n")
+    print(subprocess.check_output('sudo apt-get install python-cmd2', shell = True))
+    import subprocess # Try to import again
 import getpass # For check_if_ran_with_sudo()
 
 # Import local modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
 
-apt_get_module_list = ["python-pip", "build-essential", "python-setuptools", "curl", "libcurl4-openssl-dev", "libexpat-dev", "libncurses-dev", "zlib1g-dev", "default-jdk", "libc6:i386", "libstdc++6:i386", "zlib1g:i386", "android-tools-adb", "libconfig-dev", "g++-multilib", "gcc-multilib"]
+apt_get_module_list = ["python3-pip", "build-essential", "python3-setuptools", "curl", "libcurl4-openssl-dev", "libexpat-dev", "libncurses-dev", "zlib1g-dev",
+                       "openjdk-8-jdk", "openjdk-8-jre", "libc6:i386", "libstdc++6:i386", "zlib1g:i386", "libconfig-dev", "g++-multilib", "gcc-multilib",
+                       ]
 #"git", "m4", "texinfo", "libbz2-dev", "make", "cmake", "scons", "autoconf", "automake", "autoconf-archive", "libtool", "flex", "bison",  ]
 
 sudo_pass = ''
 logfile = "TestNode_Android_Logs.log"
 
-install_str = "pip install -U pip"
+install_str = "pip3 install -U"
 apt_get_str = "apt-get install"
 br_install_str = "brew install -v"
 
@@ -32,25 +34,30 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
         command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
-        print "Installing: %s " %command.replace(sudo_pass, '*****')
+        print("Installing: %s " %command.replace(sudo_pass, '*****'))
     elif type == "apt-get":
         command = 'echo "%s" | sudo -S %s %s --yes' % (sudo_pass, apt_get_str, module_name)
-        print "Installing: %s " %command.replace(sudo_pass, '*****')
+        print("Installing: %s " %command.replace(sudo_pass, '*****'))
     elif type == "sudo":
         command = 'echo "%s" | sudo -S %s' % (sudo_pass, cmd) # Run command with sudo
     else:
         command = cmd # Run command exactly as provided
-        print "Running: %s " % command.replace(sudo_pass, '*****')
+        print("Running: %s " % command.replace(sudo_pass, '*****'))
 
-    status, output = commands.getstatusoutput(command)
-    print output
-    print "\n"
-    print (78 * '-')
-    print "\n"
-    print "\n"
+    status, output = subprocess.getstatusoutput(command)
+    print(output)
+    print("\n")
+    print((78 * '-'))
+    print("\n")
+    print("\n")
     return status, output
 
+def update_node_version():
+    install(cmd="curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -")
+
+
 def Install_With_Apt():
+    # update_node_version()
     # Update apt first
     try:
         sys.stdout.write("Updating: Apt\n", True)
@@ -96,7 +103,7 @@ def setup_npm():
         # Install npm/node. We need this to install and run appium
         sys.stdout.write("Downloading: npm\n", True)
         npm_file, npm_url = get_npm_url()
-        print "Downloading %s" % npm_url
+        print("Downloading %s" % npm_url)
         #install(cmd="wget %s" % npm_url)
         CommonUtils.Download_File(npm_url)
     except:
@@ -104,7 +111,7 @@ def setup_npm():
         
     try:
         sys.stdout.write("Unpacking: npm\n", True)
-        print "Unpacking %s" % npm_file
+        print("Unpacking %s" % npm_file)
         install(cmd="tar -xf %s" % npm_file)
     except:
         sys.stdout.error("\tError unpacking - See log file\n")
@@ -128,14 +135,14 @@ def setup_npm():
                     break
 
         if npm_dir == '':
-            print "npm unpack directory not found, despite our best efforts"
+            print("npm unpack directory not found, despite our best efforts")
             sys.stdout.error("\tError installing - See log file\n")
             return
         
         if os.path.exists(npm_dir) == False:
-            print "Can't find npm from constructed path"
+            print("Can't find npm from constructed path")
             sys.stdout.error("\tError unpacking - See log file\n")
-        print "Found npm path: %s" % npm_dir
+        print("Found npm path: %s" % npm_dir)
         
         # Copy files to filesystem
         install(type="sudo", cmd="chown root.root -R %s" % npm_dir) # Need to change ownership before moving into file system
@@ -155,7 +162,7 @@ def setup_npm():
         
 def Installing_appium():
     
-    setup_npm()
+    # setup_npm()
         
     # Remove appium if installed, so we can upgrade cleanly from a known state
     try:
@@ -202,7 +209,7 @@ def get_android_sdk_url():
 def Installing_android_sdk(): #!!! Disabled. Don't think this is required any longer. if "android-tools-adb" fails to provide the required tools, may need to re-enable this using functino above
     android_dir = os.path.join(os.getenv('HOME'), 'android-sdk-tools')
     
-    print (78 * '-')
+    print((78 * '-'))
 
     ## Install android sdk
     try:
@@ -247,17 +254,17 @@ def check_if_ran_with_sudo():
         counter=0
         have_pass = False
         while counter != max_try:
-            print "This program needs sudo access.  please provide sudo password"
+            print("This program needs sudo access.  please provide sudo password")
             global passwd
             passwd = getpass.getpass()
-            print "checking to see if you have entered correct sudo"
+            print("checking to see if you have entered correct sudo")
             command = "echo 'sudo check'"
             p = os.system('echo "%s"|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
             if p == 256:
-                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                print("You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1))
                 counter = counter+1
             else:
-                print "sudo authentication verified!"
+                print("sudo authentication verified!")
                 have_pass = True
                 break    
         if have_pass == False:
@@ -273,9 +280,9 @@ def main(rungui = False):
     else:
         # Make sure we have root privleges
         if check_if_ran_with_sudo():
-            print "Running with root privs\n"
+            print("Running with root privs\n")
         else:
-            print "Error - Need root privleges\n"
+            print("Error - Need root privleges\n")
             quit()
 
     # Setup logging

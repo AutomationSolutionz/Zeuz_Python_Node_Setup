@@ -2,10 +2,10 @@
 # http://infohost.nmt.edu/tcc/help/pubs/tkinter/tkinter.pdf
 # Written by Lucas Donkers
 # Function: Front-end to Windows, Mac, and Linux installer scripts
-import getpass,commands
+import getpass,subprocess
 
 sudo_pass = ''
-install_str = "pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U pip"
+install_str = "pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U"
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -26,17 +26,17 @@ def check_if_ran_with_sudo():
         counter=0
         have_pass = False
         while counter != max_try:
-            print "This program needs sudo access.  please provide sudo password"
+            print("This program needs sudo access.  please provide sudo password")
             global passwd
             passwd = getpass.getpass()
-            print "checking to see if you have entered correct sudo"
+            print("checking to see if you have entered correct sudo")
             command = "echo 'sudo check'"
             p = os.system('echo "%s"|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
             if p == 256:
-                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                print("You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1))
                 counter = counter+1
             else:
-                print "sudo authentication verified!"
+                print("sudo authentication verified!")
                 have_pass = True
                 break
         if have_pass == False:
@@ -59,17 +59,17 @@ def install(type="", module_name="", module_version=None, cmd=""):
     else:
         command = cmd # Run command exactly as provided
 
-    print "Installing: %s " % command.replace(sudo_pass, '*****')
+    print("Installing: %s " % command.replace(sudo_pass, '*****'))
 
-    status, output = commands.getstatusoutput(command)
+    status, output = subprocess.getstatusoutput(command)
     if status > 0:
         if module_name in ('numpy', 'selenium', 'Appium-Python-Client'): return # Don't show an error on these items - they often fail and it's not a concern
         sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-    print output
-    print (78 * '-')
+    print(output)
+    print((78 * '-'))
 
 def get_required_mods():
-    print "Tkinter is not installed. This is required to start the graphical interface. I'll try to install it, but you may need to do this manualy. Please enter the root password if asked.\n"
+    print("Tkinter is not installed. This is required to start the graphical interface. I'll try to install it, but you may need to do this manualy. Please enter the root password if asked.\n")
     
     if sys.platform == 'win32':
         try:
@@ -79,39 +79,34 @@ def get_required_mods():
                 quit()
             # Install
             # Note: Tkinter is not available through pip nor easy_install, we assume it was packaged with Python
-            #python on some windows do not have pip 
-            
-            
-            print subprocess.check_output('python -m ensurepip --default-pip')
-            
-
-            print subprocess.check_output('python -m pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org oauthlib -vvv')
+            print(subprocess.check_output('python -m pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org oauthlib -vvv'))
             
             #python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow
-            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org setuptools -U')
-            print subprocess.check_output('pip download --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow') # Must be done before installing or Image and ImageTk will fail
-            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow -U')
-            print subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests -U')
-        except:
-            print "Failed to install. Please run: pip download pillow & pip install pillow"
-            raw_input('Press ENTER to exit')
+            print(subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org setuptools -U'))
+            print(subprocess.check_output('pip download --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow')) # Must be done before installing or Image and ImageTk will fail
+            print(subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pillow -U'))
+            print(subprocess.check_output('python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests -U'))
+        except Exception as e:
+            print("Failed to install. Please run: pip download pillow & pip install pillow")
+            print("Exception is: ", e)
+            input('Press ENTER to exit')
             quit()
 
-    elif sys.platform == 'linux2':
+    elif sys.platform in ['linux2','linux']:
         try:
-            print subprocess.check_output('sudo apt-get update', shell = True)
-            print subprocess.check_output('sudo apt-get -y install python-tk python-pil python-pil.imagetk python-requests', shell = True)
+            print(subprocess.check_output('sudo apt-get update', shell = True))
+            print(subprocess.check_output('sudo apt-get -y install python3-tk python3-pil python3-pil.imagetk python3-requests', shell = True))
         except:
-            print "Failed to install. Please run: sudo apt-get -y install python-tk python-pil python-pil.imagetk python-requests"
-            raw_input('Press ENTER to exit')
+            print("Failed to install. Please run: sudo apt-get -y install python3-tk python3-pil python3-pil.imagetk python3-requests")
+            input('Press ENTER to exit')
             quit()
     elif sys.platform == 'darwin':
         try:
             global sudo_pass
             if check_if_ran_with_sudo():
-                print "Running with root privs\n"
+                print("Running with root privs\n")
             else:
-                print "Error - Need root privleges\n"
+                print("Error - Need root privleges\n")
                 quit()
 
             install(type="sudo", cmd="easy_install pip")
@@ -129,37 +124,40 @@ def get_required_mods():
 
 
         except:
-            print "Failed to install for mac. Please install the required modules"
-            raw_input('Press ENTER to exit')
+            print("Failed to install for mac. Please install the required modules")
+            input('Press ENTER to exit')
             quit()
     else:
-        print "Could not automatically install required modules"
-        raw_input('Press ENTER to exit')
+        print("Could not automatically install required modules")
+        input('Press ENTER to exit')
         quit()
         
     # Verify install worked
     try:
         global tk, Image, ImageTk, requests
         import requests
-        import Tkinter as tk
+        import tkinter as tk
         from PIL import Image, ImageTk
-        print "Successfully installed. Will now try to run the graphical interface."
-    except:
-        print "Failed to install. Please try to install manually"
-        raw_input('Press ENTER to exit')
+        print("Successfully installed. Will now try to run the graphical interface.")
+    except Exception as e:
+        print("Import Exception : {}".format(e))
+        print("Failed to install. Please try to install manually")
+        input('Press ENTER to exit')
         quit()
 
 # Import modules
-import os, os.path, thread, sys, time, glob, thread, subprocess, importlib, Queue
+import os, os.path, _thread, sys, time, glob, _thread, subprocess, importlib, queue
 
 # Have user install Tk if this fails
 try:
     import requests
     from PIL import Image, ImageTk
-    import Tkinter as tk
-except: get_required_mods()
+    import tkinter as tk
+except Exception as e:
+    print("Import Exception : {}".format(e))
+    get_required_mods()
         
-import tkMessageBox
+import tkinter.messagebox
 
 # Import local modules
 need_to_download = False
@@ -189,7 +187,7 @@ Usage:\n\
 Check the setup checkbox you wish to install, enter the root password if required, and press the Install button. You will see all the modules that are installed, and will be notified when complete.\n\n\
 Currently supported operating systems: Windows 7, Windows 10, Debian, Ubuntu, Lubuntu, Linux Mint, etc (Debian based), Mac OS X\n\n\
 "
-q = Queue.Queue() # Initiate queue for logging
+q = queue.Queue() # Initiate queue for logging
 install_complete_check = False
 zeuz_installer_url = 'https://github.com/AutomationSolutionz/Zeuz_Python_Node_Setup/archive/master.zip' # Location of the installer files - used when they are already downloaded
 installer_location = os.path.dirname(os.path.realpath(__file__)) # Default location of the installer files is where this program was run from
@@ -321,7 +319,7 @@ class Application(tk.Frame):
             self.filelist = self.get_installer_scripts('Zeuz_Node') # Get Crossplatform scripts - needed for zeuz node sw
             if sys.platform == 'win32':
                 self.filelist.update(self.get_installer_scripts('Windows'))
-            elif sys.platform == 'linux2':
+            elif sys.platform in ['linux2','linux']:
                 self.filelist.update(self.get_installer_scripts('Linux'))
             elif sys.platform == 'darwin':
                 self.filelist.update(self.get_installer_scripts('Mac'))
@@ -340,20 +338,20 @@ class Application(tk.Frame):
         # Execute selected installer scripts
         if sys.platform != 'win32':
             if len(self.password.get()) == 0:
-                tkMessageBox.showerror('Error', 'Root password must be entered to continue')
+                tkinter.messagebox.showerror('Error', 'Root password must be entered to continue')
                 return
             else:
                 p = os.system('echo "%s" | sudo -S echo 2>/dev/null' % self.password.get()) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
                 if p != 0: # Wrong password
-                    tkMessageBox.showerror('Error', 'Root password is incorrect. Please re-enter it.')
+                    tkinter.messagebox.showerror('Error', 'Root password is incorrect. Please re-enter it.')
                     return
         if len(self.runlist) > 0:
             self.install_button.grid_remove() # Hide installer button
             root.after(2000, self.install_complete) # Show installer button when complete
             root.after(500, self.read_log) # Start log reader
-            thread.start_new_thread(self.execute, ())
+            _thread.start_new_thread(self.execute, ())
         else:
-            tkMessageBox.showerror('Error', 'At least one installer needs to be checked')
+            tkinter.messagebox.showerror('Error', 'At least one installer needs to be checked')
         
     def execute(self):
         # Must be called in a thread - executes all scripts in order
@@ -484,7 +482,7 @@ class Application(tk.Frame):
         import zipfile, requests, time, glob
         global installer_location, q, install_complete_check, root, need_to_download
 
-        tkMessageBox.showinfo('Downloading', 'Installation files are missing. Please watch the log window for updates as we download them. Press OK to start.')
+        tkinter.messagebox.showinfo('Downloading', 'Installation files are missing. Please watch the log window for updates as we download them. Press OK to start.')
         
         # Standalone functions needed to perform this work when we don't have access to CommonUtils.py
         def Download_File(url, filename):
@@ -509,8 +507,9 @@ class Application(tk.Frame):
                 q.put(chr(8) * pp) # Erase previous percentage from terminal
                 q.put("100.0%\n") # Need a new line after percentage display is complete. We specify 100% here because we may miss the opportunity to display it above if the update doesn't occur on the last block of data
                 return True
-            except:
-                q.put("Error") 
+            except Exception as e:
+                print("Download Exception: ",e)
+                q.put("Error")
                 return False
     
         def unzip(zipFilePath, destDir):
@@ -529,7 +528,8 @@ class Application(tk.Frame):
                 zfile.close()
                 q.put("Done\n")
                 return True
-            except: 
+            except Exception as e:
+                print("Unzip Exception : ",e)
                 q.put("Error")
                 return False
     
@@ -556,7 +556,9 @@ class Application(tk.Frame):
                     install_complete_check = True # Shutdown read_log(), and put display button
                     sys.path.append(installer_location)
                     try: from Crossplatform import CommonUtils # Try to import again, in case it failed the first time
-                    except: q.put('Installer files downloaded and unzipped, but something is wrong. You will need to download the entire installer package manually.\n')
+                    except Exception as e:
+                        print("Platform Exception : ", e)
+                        q.put('Installer files downloaded and unzipped, but something is wrong. You will need to download the entire installer package manually.\n')
                 
                 # Bitter failure
                 else:
@@ -570,7 +572,7 @@ class Application(tk.Frame):
         self.install_button.grid_remove() # Hide install button, so users can't do anything until we're done
         self.after(2000, self.install_complete) # Show installer button when complete
         self.after(500, self.read_log) # Start log reader, so we can update the user
-        thread.start_new_thread(main, ()) # Download installer files in separate thread, so we don't block
+        _thread.start_new_thread(main, ()) # Download installer files in separate thread, so we don't block
         
 
 if __name__ == '__main__':

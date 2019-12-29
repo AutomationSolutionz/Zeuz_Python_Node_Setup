@@ -5,10 +5,10 @@ import sys
 import getpass
 
 try:
-    import commands  # We need commands to do anything, so if it's not installed, use subprocess to install it first
+    import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
 except:
 
-    import commands  # Try to import again
+    import subprocess  # Try to import again
 
 # Import local modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
@@ -30,14 +30,15 @@ global brew_module_list
 sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
-install_str_pip = "pip install -U pip"
+install_str_pip = "pip install -U"
 install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
 easy_instal_list = ['https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
 
-pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "simplejson", "urllib3", "selenium",
-                   "requests", "poster", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
+pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "imutils", "simplejson", "urllib3", "selenium",
+                   "python-dateutil",
+                   "requests", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
                    "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2","locustio", "realbrowserlocusts","pyshortcuts"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'geckodriver']
@@ -52,17 +53,17 @@ def check_if_ran_with_sudo():
         counter=0
         have_pass = False
         while counter != max_try:
-            print "This program needs sudo access.  please provide sudo password"
+            print("This program needs sudo access.  please provide sudo password")
             global passwd
             passwd = getpass.getpass()
-            print "checking to see if you have entered correct sudo"
+            print("checking to see if you have entered correct sudo")
             command = "echo 'sudo check'"
             p = os.system('echo "%s"|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
             if p == 256:
-                print "You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1)
+                print("You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1))
                 counter = counter+1
             else:
-                print "sudo authentication verified!"
+                print("sudo authentication verified!")
                 have_pass = True
                 break    
         if have_pass == False:
@@ -92,14 +93,14 @@ def install(type="", module_name="", module_version=None, cmd=""):
     else:
         command = cmd # Run command exactly as provided
 
-    print "Installing: %s " % command.replace(sudo_pass, '*****')
+    print("Installing: %s " % command.replace(sudo_pass, '*****'))
 
-    status, output = commands.getstatusoutput(command)
+    status, output = subprocess.getstatusoutput(command)
     if status > 0:
         if module_name in ('numpy', 'selenium', 'Appium-Python-Client'): return # Don't show an error on these items - they often fail and it's not a concern
         sys.stdout.error("\t See log file\n")  # Print to terminal window, and log file
-    print output
-    print (78 * '-')
+    print(output)
+    print((78 * '-'))
 
 
 def Installer_With_Brew():
@@ -108,8 +109,8 @@ def Installer_With_Brew():
             sys.stdout.write("Installing: %s\n" % each, True)
             cmd = "brew install %s" % each
             output = os.system(cmd)
-            print output
-            print (78 * '-')
+            print(output)
+            print((78 * '-'))
         except:
             sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
 
@@ -121,7 +122,7 @@ def Installer_With_Pip():
             install(type="pip", module_name=each)
         except:
             sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-            print "Prolblem occured while installing %s" % each
+            print("Prolblem occured while installing %s" % each)
 
     for each in pip_only_mac:
         try:
@@ -139,7 +140,7 @@ def Install_Easy_Installer():
             install(type="easy_install", module_name=each)
         except:
             sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-            print "Prolblem occured while installing %s" % each
+            print("Prolblem occured while installing %s" % each)
 
 
 
@@ -151,11 +152,11 @@ def Install_Chrome_Drivers():
         sys.stdout.write("Installing: Chrome Driver\n", True)
         cmd = "brew cask install chromedriver"
         output = os.system(cmd)
-        print output
-        print (78 * '-')
+        print(output)
+        print((78 * '-'))
     except:
         sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window and log file
-        print "Unable to link chromedriver"
+        print("Unable to link chromedriver")
 
 
 def Install_Firefox_Drivers():
@@ -172,28 +173,28 @@ def Install_Pip():
         install(cmd="wget https://bootstrap.pypa.io/get-pip.py")
         install(type="sudo", cmd="python get-pip.py")
         
-        print output
-        print (78 * '-')
+        print(output)
+        print((78 * '-'))
     except:
         sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-        print "Unable to install pip"
+        print("Unable to install pip")
 
 
 def Install_Chrome_Browser():
     ## Install Chrome
     sys.stdout.write("Installing: Chrome\n", True)
-    print (78 * '-')
+    print((78 * '-'))
     print ('Chrome Installation')
-    print (78 * '-')
+    print((78 * '-'))
     os.system("brew cask install google-chrome")
 
 
 def Install_firefox_Browser():
     ## Install Chrome
     sys.stdout.write("Installing: Frefox and Driver\n", True)
-    print (78 * '-')
+    print((78 * '-'))
     print ('firefox Installation')
-    print (78 * '-')
+    print((78 * '-'))
     os.system("brew cask install firefox")
 
 
@@ -202,11 +203,11 @@ def Install_Brew():
     try:
         sys.stdout.write("Installing: Brew\n", True)
         brew_string = 'echo "%s" | /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"' % sudo_pass
-        print os.system(brew_string)
-        print "Successfully installed brew"
+        print(os.system(brew_string))
+        print("Successfully installed brew")
     except:
         sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-        print "Unable to install brew.  Please install brew manually"
+        print("Unable to install brew.  Please install brew manually")
         return False
 
 
@@ -217,9 +218,9 @@ def main(rungui = False):
     else:
         # Make sure we have root privleges
         if check_if_ran_with_sudo():
-            print "Running with root privs\n"
+            print("Running with root privs\n")
         else:
-            print "Error - Need root privleges\n"
+            print("Error - Need root privleges\n")
             quit()
 
     # Setup logging
