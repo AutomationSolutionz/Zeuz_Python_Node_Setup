@@ -6,14 +6,6 @@
 import subprocess, re, os, sys  # These modules should be available on every platform
 import getpass  # For check_if_ran_with_sudo()
 
-try:
-    import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
-except:
-    print(
-        "Module Commands is missing. I'll attempt to install it manually. If it fails, you'll need to do this yourself: sudo apt-get install python-cmd2.\n")
-    print(subprocess.check_output('sudo apt-get install python-cmd2', shell=True))
-    import subprocess  # Try to import again
-
 # Import local modules
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))  # Set the path, so the can find the modules
@@ -30,7 +22,7 @@ pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "u
                    "uiautomator", "requests", "wheel","colorama",
                    "pyautogui", "Appium-Python-Client", "lxml", "xlrd", "pyscreenshot", "futures", "image",
                    "tzlocal", "pyautocad", "PyPDF2",
-                   "locustio", "realbrowserlocusts", "pyshortcuts"]
+                   "pyshortcuts"]
 
 # Commands that help with installation
 install_str = "pip3 install -U"

@@ -112,9 +112,7 @@ def Installer_With_Pip():
                        "SpeechRecognition","colorama",
                        "python-dateutil", "Appium-Python-Client", "futures", "xlwings", "image", "tzlocal", "pyautocad",
                        "PyPDF2",
-                       "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/greenlet-0.4.15-cp38-cp38-win32.whl",
-                       "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/gevent-1.5a2-cp38-cp38-win32.whl",
-                       "locustio", "realbrowserlocusts", "pyshortcuts",
+                       "pyshortcuts",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/PyAudio-0.2.11-cp38-cp38-win32.whl",
                        "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/psutil-5.6.3-cp38-cp38-win32.whl",
@@ -140,16 +138,6 @@ def Installer_With_Pip():
         except Exception as e:
             print("{} Exception :{}".format(each, e))
             sys.stdout.error("\tAn error occurred. See log for more details.\n")
-
-    # pywin32 dll installation
-    sys.stdout.write("Installing: pywin32\n", True)
-    pywindll_install_file = os.path.join(python_scripts_dir,'pywin32_postinstall.py')
-    command = "python" + pywindll_install_file + " -install"
-    try:
-        install(cmd=command)
-    except Exception as e:
-        print("pywin32dll Exception :{}".format(e))
-        sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
     # poster installation
     sys.stdout.write("Installing: poster3\n", True)
@@ -193,24 +181,6 @@ def Installer_With_MSI():
                 return
             print("installing: %s " % file_name)
             print(os.system('msiexec /i %s /qn' % dl_path))
-        except:
-            # print("\tAn error occurred In Installing. See log for more details.\n")
-            sys.stdout.error("\tAn error occurred In Installing. See log for more details.\n")
-
-def Visual_C_Build_Tool():
-    list_of_msi_link = [
-        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/visualcppbuildtools_full.exe",
-    ]
-    for each in list_of_msi_link:
-        file_name = each.split('/')[-1]
-        try:
-            dl_path = r'%s\%s' % (python_dir, file_name)
-            if not CommonUtils.Download_File(each, dl_path):
-                sys.stdout.error("\tAn error occurred while downloading file. See log for more details.\n")
-                # print("\tAn error occurred while downloading file. See log for more details.\n")
-                return
-            print("installing: %s " % file_name)
-            print(os.system('%s /Passive' % dl_path))
         except:
             # print("\tAn error occurred In Installing. See log for more details.\n")
             sys.stdout.error("\tAn error occurred In Installing. See log for more details.\n")
@@ -419,9 +389,9 @@ def Check_Pre_Req(gui):
 
 
 def move_all_files_from_folder(src_file, des_file):
+    import os
     try:
         import shutil
-        import os
         files = os.listdir(src_file)
         for f in files:
                 shutil.move(src_file+os.sep+f, des_file)
@@ -481,7 +451,6 @@ def main(rungui=False):
     # Install
     if Check_Pre_Req(rungui):
         # Installer_With_Easy_Install()
-        Visual_C_Build_Tool()
         Installer_With_Pip()
         # Installer_With_MSI()
         Selenium_Driver_Files_Windows()

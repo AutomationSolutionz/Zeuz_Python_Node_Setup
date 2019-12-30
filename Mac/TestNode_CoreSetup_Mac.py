@@ -4,27 +4,12 @@ import os, subprocess
 import sys
 import getpass
 
-try:
-    import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
-except:
-
-    import subprocess  # Try to import again
-
 # Import local modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
 
 
 # Commands that help with installation
-
-global logfile
-global install_str_pip
-global install_str_easy_install
-global brew_str
-global easy_instal_list
-global pip_module_list
-global pip_only_mac
-global brew_module_list
 
 
 sudo_pass = ''
@@ -39,7 +24,7 @@ easy_instal_list = ['https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/ar
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "imutils", "simplejson", "urllib3", "selenium",
                    "python-dateutil",
                    "requests", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
-                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2","locustio", "realbrowserlocusts","pyshortcuts"]
+                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'geckodriver']
 

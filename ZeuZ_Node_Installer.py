@@ -288,7 +288,8 @@ class Application(tk.Frame):
         self.android = tk.IntVar()
         self.ios = tk.IntVar()
         self.zeuznode = tk.IntVar()
-        
+        self.performance = tk.IntVar()
+
         tk.Label(self.installerframe, text = "Core Setup:").grid(row = 0, column = 0, sticky = 'w')
         tk.Checkbutton(self.installerframe, variable = self.core).grid(row = 0, column = 1, sticky = 'w')
         
@@ -306,8 +307,13 @@ class Application(tk.Frame):
         tk.Label(self.installerframe, text = "Install Zeuz Node:").grid(row = 3, column = 0, sticky = 'w')
         tk.Checkbutton(self.installerframe, variable = self.zeuznode).grid(row = 3, column = 1, sticky = 'w')
 
+        install_button_row = 5
+
+        tk.Label(self.installerframe, text="Performance Testing:").grid(row=4, column=0, sticky='w')
+        tk.Checkbutton(self.installerframe, variable=self.performance).grid(row=4, column=1, sticky='w')
+
         self.install_button = tk.Button(self.installerframe, text = "Install", width = self.button_width, command = self.run_installer)
-        self.install_button.grid(row = 4, column = 0, columnspan = 2)
+        self.install_button.grid(row = install_button_row, column = 0, columnspan = 2)
         
         if need_to_download: self.download_installer_files()
         
@@ -331,7 +337,10 @@ class Application(tk.Frame):
             if self.android.get() == 1: self.runlist.append(self.filelist['android'])
             if self.ios.get() == 1: self.runlist.append(self.filelist['ios'])
             if self.zeuznode.get() == 1: self.runlist.append(self.filelist['zeuznode'])
-        except:
+            if self.performance.get() == 1:
+                self.runlist.append(self.filelist['performance'])
+        except Exception as e:
+            print("Run Installer Exception: {}".format(e))
             self.download_installer_files()
             return
         
@@ -431,9 +440,11 @@ class Application(tk.Frame):
                 filelist['android'] = f.replace(opsys + os.sep, '')
             elif 'ios' in f.lower():
                 filelist['ios'] = f.replace(opsys + os.sep, '')
+            elif 'performance' in f.lower():
+                filelist['performance'] = f.replace(opsys + os.sep, '')
             elif 'node' in f.lower():
                 filelist['zeuznode'] = f.replace(opsys + os.sep, '')
-        
+
         return filelist
 
     def display_image(self, w, filename):

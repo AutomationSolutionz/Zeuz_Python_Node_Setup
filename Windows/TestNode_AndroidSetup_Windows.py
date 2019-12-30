@@ -1,7 +1,7 @@
 # Copyright 2017, Automation Solutionz
 
 import subprocess
-from subprocess import PIPE, Popen,STDOUT
+from subprocess import PIPE, Popen
 import shutil
 import os, os.path, win32api, win32con, win32gui
 from os.path import expanduser
@@ -15,6 +15,7 @@ import psutil
 import inspect
 import ctypes
 from ctypes.wintypes import HWND, UINT, WPARAM, LPARAM, LPVOID #this belongs to registry editor
+#from builtins import True
 LRESULT = LPARAM  # synonymous.  This belongs to registry
 import winreg as winreg
 
@@ -41,7 +42,7 @@ global installer_jdk_file_part_2
 global installer_jdk_file_part_3 
 global installer_jdk_file_name
 global install_node_file
-global android_studio_installer 
+
 
 
 
@@ -49,31 +50,112 @@ npm_path = os.environ["ProgramW6432"]+os.sep+ "nodejs"
 appium_path = os.getenv('APPDATA') + os.sep + "npm" + os.sep + "appium"
 #Android_Home_Dir  =  expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk"
 
-def Auto_locate_Android_Studio():
-    try:
-        android_where_output_str = ""
-        Android_where = r"where android"
-        android_where_output_raw = subprocess.run(Android_where, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        android_where_output_bytes = android_where_output_raw.stdout
-        android_where_output_str = str(android_where_output_bytes, 'utf-8')
-        if android_where_output_str != "":
-            return (android_where_output_str.split("tools")[0].rstrip(os.sep))
-        else:
-            return (expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk")
 
+
+def Get_Home_Dir():
+    sModuleInfo = inspect.stack()[0][3] + " : " + inspect.getmodulename(__file__)
+    try:
+        home_dir = expanduser("~")
+        return home_dir
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail, True)
+        return False
+
+def Download_File(base_url, file_name,md5=False):
+    try:
+
+        
+        sys.stdout.write("Downloading from: %s\n"%(base_url+file_name), True)
+
+        file_url = base_url + file_name
+        download_path =  Get_Home_Dir()+os.sep + 'Downloads' + os.sep +  file_name
+        '''
+        some times files gets corrpt and we need to re-download
+        if os.path.isfile(download_path):
+            #print "already downloading... skipping download"
+            sys.stdout.write("already downloading... skipping download", True)
+            return download_path
+        '''
+        r = requests.get(file_url, stream=True)
+        path = download_path
+        with open(path, 'wb') as f:
+            total_length = int(r.headers.get('content-length'))
+            for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1): 
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+        f.close()
+        sys.stdout.write("Download completed", True)
+        return download_path
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print(Error_Detail)
+        return False
+
+def Unzip_All_folders_files(zip_file_location, destination_folder):
+    try:   
+        
+        from zipfile import ZipFile
+        # Create a ZipFile Object and load sample.zip in it
+        with ZipFile(zip_file_location, 'r') as zipObj:
+        # Extract all the contents of zip file in different directory
+            zipObj.extractall(destination_folder)
+            sys.stdout.write("\n Unzipped: %s Successfully in the folder: %s\n"%(zip_file_location,destination_folder),True )
+            return True
+        return False
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print(Error_Detail)
+        return False
+
+def Auto_locate_Android_Studio():
+    try:
+        android_where_output_str = ""
+        Android_where = r"where adb"
+        android_where_output_raw = subprocess.run(Android_where, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        android_where_output_bytes = android_where_output_raw.stdout
+        android_where_output_str = str(android_where_output_bytes, 'utf-8')
+        if android_where_output_str != "":
+            sys.stdout.write ("\nFound adb under: %s\n"%android_where_output_str, True)
+            return True
+        elif os.path.exists(expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk")  == True: 
+            sys.stdout.write ("\nFound Android under default path: %s "%(expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk"),True)
+            return True
+        else:
+            sys.stdout.write ("\nZeuZ will download a light version of Android SDK for Appium to work in the default Android Studio location: %s\n"%(expanduser("~")+os.sep + "AppData" + os.sep +  "Local" +os.sep + "Android"),True)
+            zip_file_name = "Android.zip"
+            base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
+            destination_folder =  (expanduser("~")+os.sep + "AppData" + os.sep +  "Local")
+            zip_downloaded_file = Download_File(base_url, zip_file_name,md5=False)
+            if zip_downloaded_file == False:
+                sys.stdout.error ("\n Unable to download Android SDK of ZeuZ Version\n",True)
+                return False
+            unzip_status = Unzip_All_folders_files(zip_downloaded_file, destination_folder)  
+            return unzip_status
+            
+                     
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print(Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False  
+
       
-Android_Home_Dir = Auto_locate_Android_Studio()    
+Android_Home_Dir = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk")    
 Android_Tools_bin_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
-Android_Tools_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
+Android_Tools_Dir = Android_Home_Dir + os.sep + "tools"
 Android_Platform_Tools_Dir = Android_Home_Dir + os.sep + "platform-tools"
-Android_Build_Tools_Dir = Android_Home_Dir + os.sep + "build-tools"
+# - not needed anymore with new android Android_Build_Tools_Dir = Android_Home_Dir + os.sep + "build-tools"
 Downloaded_Path = expanduser("~")+os.sep + "Downloads" 
 Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
 logfile = "TestNode_Android_Logs.log"
@@ -85,7 +167,7 @@ installer_jdk_file_part_2  = "jdk-8u231-windows-x64.sfx.part2.rar"
 installer_jdk_file_part_3  = "jdk-8u231-windows-x64.sfx.part3.rar"
 installer_jdk_file_name = r"jdk-8u231-windows-x64.exe"
 install_node_file = 'node-v10.15.3-x64.msi'
-android_studio_installer = r"3.5.1.0/android-studio-ide-191.5900203-windows.exe"
+
 
 
 def detect_admin():
@@ -120,25 +202,25 @@ def Check_Pre_Req():
     admin_check = is_admin()
     if admin_check == False:
         print("")
-        sys.stdout.error("Unable to elevate current action to run as admin.\n", True) # Print to terminal window, and log file
+        sys.stdout.error("Unable to elevate current action to run as admin.\n",True) # Print to terminal window, and log file
         return False
     else:
-        sys.stdout.write("Admin check pass\n", True)
+        sys.stdout.write("Admin check pass\n",True)
 
     if os.name != 'nt':
-        sys.stdout.error("This installer must be run on Windows\n", True) # Print to terminal window, and log file
+        sys.stdout.error("This installer must be run on Windows\n",True) # Print to terminal window, and log file
         return False
     if sys.version_info[:2] != (3,8):
-        sys.stdout.error("32bit Python v3.8 must be installed\n", True) # Print to terminal window, and log file
+        sys.stdout.error("32bit Python v3.8 must be installed\n",True) # Print to terminal window, and log file
         return False
     if platform.architecture()[0] != '32bit':
-        sys.stdout.error("32bit Python v3.8 must be installed\n", True) # Print to terminal window, and log file
+        sys.stdout.error("32bit Python v3.8 must be installed\n",True) # Print to terminal window, and log file
         return False
     if 'setuptools' not in cmdline("easy_install --version"):
-        sys.stdout.error("'easy_install' is not installed or not in the PATH.\n", True) # Print to terminal window, and log file
+        sys.stdout.error("'easy_install' is not installed or not in the PATH.\n",True) # Print to terminal window, and log file
         return False
     if 'pip' not in cmdline("pip --version"):
-        sys.stdout.error("pip is not installed, or not in your PATH variable.\n", True) # Print to terminal window, and log file
+        sys.stdout.error("pip is not installed, or not in your PATH variable.\n",True) # Print to terminal window, and log file
         return False
     
     sys.stdout.write("Pre-requirements verified successfully\n",True)
@@ -154,102 +236,57 @@ def Kill_Process(name):
         if name in str(procd['name']) and procd['pid'] != this_proc:
             proc.kill()
 
-def Get_Home_Dir():
-    sModuleInfo = inspect.stack()[0][3] + " : " + inspect.getmodulename(__file__)
-    try:
-        home_dir = expanduser("~")
-        return home_dir
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
-        return False
-
-def Download_File(base_url, file_name,md5=False):
-    try:
-
-        
-        sys.stdout.write("Downloading from: %s\n"%(base_url+file_name), True)
-
-        file_url = base_url + file_name
-        download_path =  Get_Home_Dir()+os.sep + 'Downloads' + os.sep +  file_name
-        
-        if os.path.isfile(download_path):
-            #print "already downloading... skipping download"
-            sys.stdout.write("already downloading... skipping download", True)
-            return download_path
-        
-        r = requests.get(file_url, stream=True)
-        path = download_path
-        with open(path, 'wb') as f:
-            total_length = int(r.headers.get('content-length'))
-            for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1): 
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
-        f.close()
-        sys.stdout.write("Download completed", True)
-        return download_path
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print(Error_Detail)
-        return False
-
 def Delete_File(file_path):
     try:
-        sys.stdout.write("Deleting file: %s\n"%file_path, True)
+        sys.stdout.write("Deleting file: %s\n"%file_path,True)
         if os.path.exists(file_path):
             os.remove(file_path)
             if os.path.exists(file_path) == False:
-                sys.stdout.write("\tDeleted successfully\n", True)
+                sys.stdout.write("\tDeleted successfully\n",True)
                 return True
             else: 
-                sys.stdout.error("\tWe could not delete the file\n", True)
+                sys.stdout.error("\tWe could not delete the file\n",True)
                 return False
         else:
             print("file does not exits")
-            sys.stdout.write("\tFile was not found\n", True)
+            sys.stdout.write("\tFile was not found\n",True)
             return True
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
 
 def Delete_Folder(src_folder):
     try:
-        sys.stdout.write("Deleting folder: %s\n"%src_folder)
+        sys.stdout.write("Deleting folder: %s\n"%src_folder,True)
         if os.path.exists(src_folder) == False:
             print("Source folder does not exists")
-            sys.stdout.write("\tSource folder does not exists\n")
+            sys.stdout.write("\tSource folder does not exists\n",True)
             return True
         if os.path.exists(src_folder) == True:
             print("Existing folder found.. will delete")
-            sys.stdout.write("\tExisting folder found.. will delete\n")
+            sys.stdout.write("\tExisting folder found.. will delete\n",True)
             shutil.rmtree(src_folder)
             if os.path.exists(src_folder) == True:
-                sys.stdout.write("\tWe tried to delete the folder but could not delete\n")
+                sys.stdout.write("\tWe tried to delete the folder but could not delete\n",True)
                 return False
             else:
-                sys.stdout.write("\tFolder found and successfully deleted\n")
+                sys.stdout.write("\tFolder found and successfully deleted\n",True)
                 return True
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail, True)
         return False
 
 def Move_and_Overwrite_Folder(src_folder, des_folder):
     try:
-        sys.stdout.write("\tMoving from %s to %s\n"%(src_folder, des_folder))
+        sys.stdout.write("\tMoving from %s to %s\n"%(src_folder, des_folder),True)
         if os.path.exists(src_folder) == False:
             print("Source folder does not exists...Unable to copy")
             return False
@@ -265,7 +302,7 @@ def Move_and_Overwrite_Folder(src_folder, des_folder):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False    
     
 def Copy_and_Overwrite_Folder(src_folder, des_folder):
@@ -285,7 +322,7 @@ def Copy_and_Overwrite_Folder(src_folder, des_folder):
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
         print("Unable to copy and overwrite folder and its content")
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail, True)
         return False    
     
 def Install_JDK():
@@ -294,43 +331,43 @@ def Install_JDK():
     don't have java installed or if you don't have java set in path, we will install a known latest version that we have in our repo.
     '''
     try:
-        sys.stdout.write("Validating if JDK is installed...\n", True) # Print to terminal window, and log file
+        sys.stdout.write("Validating if JDK is installed...\n",True) # Print to terminal window, and log file
         print("Validating if JDK is installed...")
         base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
         check_JDK = Check_If_JDK_Installed()
         print(check_JDK)
         if check_JDK == False:
-            sys.stdout.write("JDK was not installed  We will download and install known stable version of JDK \n", True) # Print to terminal window, and log file
+            sys.stdout.write("JDK was not installed  We will download and install known stable version of JDK \n",True) # Print to terminal window, and log file
             print("JDK was not installed  We will download and install known stable version of JDK")
             #Download 3 parts of installer
             print("part 1 of 3")
-            sys.stdout.write("Downloading JDK part 1 of 3 \n", True)
+            sys.stdout.write("Downloading JDK part 1 of 3 \n",True)
             java_installer_path_1 = Download_File(base_url, installer_jdk_file_part_1)
             print("part 2 of 3")
-            sys.stdout.write("Downloading JDK part 2 of 3 \n", True)
+            sys.stdout.write("Downloading JDK part 2 of 3 \n",True)
             java_installer_path_2 = Download_File(base_url, installer_jdk_file_part_2)
             print("part 3 of 3")
-            sys.stdout.write("Downloading JDK part 3 of 3 \n", True)
+            sys.stdout.write("Downloading JDK part 3 of 3 \n",True)
             java_installer_path_3 = Download_File(base_url , installer_jdk_file_part_3)            
             
             #extracting file
-            sys.stdout.write("Please wait while we extracting files silently...\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Please wait while we extracting files silently...\n",True) # Print to terminal window, and log file
             print("Extracting files silently...")
             silent_extract_command = "%s /s"%(Downloaded_Path + os.sep + installer_jdk_file_part_1)
             os.system(silent_extract_command)   
-            sys.stdout.write("JDK Extraction completed\n", True)
+            sys.stdout.write("JDK Extraction completed\n",True)
             print("Extracting completed")
             
             print("We are installing java silently, please wait...")
             
             jdk_exe_path = current_script_path + os.sep+ installer_jdk_file_name
             silent_installer_command = "%s /s"%jdk_exe_path
-            sys.stdout.write("Installing JDK silently from %s.  This will take some time...\n"%jdk_exe_path, True) # Print to terminal window, and log file
+            sys.stdout.write("Installing JDK silently from %s.  This will take some time...\n"%jdk_exe_path,True) # Print to terminal window, and log file
 
             os.system(silent_installer_command)     
             #this will set all paths as well
             Check_If_JDK_Installed()
-            sys.stdout.write("Cleaning up temp JDK installer files...\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Cleaning up temp JDK installer files...\n",True) # Print to terminal window, and log file
             print("Cleaning up temp JDK installer files...")
             Delete_File(Downloaded_Path + os.sep + installer_jdk_file_part_1)
             Delete_File(Downloaded_Path + os.sep + installer_jdk_file_part_2)
@@ -338,10 +375,10 @@ def Install_JDK():
             Delete_File(current_script_path + os.sep + installer_jdk_file_name)
             #setting java path
             JAVA_PATH()
-            sys.stdout.write("JDK Install completed\n", True)
+            sys.stdout.write("JDK Install completed\n",True)
             return True
         else:
-            sys.stdout.write("JDK is already installed\n", True)
+            sys.stdout.write("JDK is already installed\n",True)
             print("JDK is already installed")
             return True
     except Exception as e:
@@ -349,7 +386,7 @@ def Install_JDK():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
 
 
@@ -376,12 +413,12 @@ def Check_If_JDK_Installed():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
 
 def JAVA_PATH():
     try:
-        sys.stdout.write("\tWe will check default location to see if we can locate JDK\n", True)
+        sys.stdout.write("\tWe will check default location to see if we can locate JDK\n",True)
         java_path_64 = r'C:\Program Files\Java'
         java_path_32 = r'C:\Program Files (x86)\Java'
         if (os.path.isdir(java_path_64)):
@@ -390,29 +427,29 @@ def JAVA_PATH():
             java_path_default = java_path_32
         else:
 
-            sys.stdout.write("\tWe couldnt find java installed in default Program Files directory\n", True)
+            sys.stdout.write("\tWe couldnt find java installed in default Program Files directory\n",True)
             return False
-        sys.stdout.write("\tFound java installed in: %s\n"%java_path_default, True)
+        sys.stdout.write("\tFound java installed in: %s\n"%java_path_default,True)
        
         java_list = list(filter(os.path.isdir, [os.path.join(java_path_default,f) for f in os.listdir(java_path_default)]))
         for each in java_list:
             if "jdk" in each:
-                sys.stdout.write("We found JDK in default program files path.  We will set javac to the path\n", True)
+                sys.stdout.write("We found JDK in default program files path.  We will set javac to the path\n",True)
                 javac_path = each +os.sep + "bin"
-                sys.stdout.write("Setting JAVA_HOME to Environment\n", True)
+                sys.stdout.write("Setting JAVA_HOME to Environment\n",True)
                 Add_To_Path("JAVA_HOME",each)
-                sys.stdout.write("Adding Java bin to PATH\n", True)
+                sys.stdout.write("Adding Java bin to PATH\n",True)
                 Add_To_Path("PATH",javac_path)
                 return True
 
-        sys.stdout.write("\tJDK is not found in the default program files path\n", True)
+        sys.stdout.write("\tJDK is not found in the default program files path\n",True)
         return False
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
 
  
@@ -423,38 +460,38 @@ def Android_SDK_PATH():
         #set android home path
 
 
-        sys.stdout.write("Setting ANDROID_HOME to Environmental variable\n", True)
+        sys.stdout.write("Setting ANDROID_HOME to Environmental variable\n",True)
         Add_To_Path("ANDROID_HOME", Android_Home_Dir)
         #set tools to path
 
-        sys.stdout.write("Setting tools dir to PATH\n", True)
+        sys.stdout.write("Setting tools dir to PATH\n",True)
         Add_To_Path("PATH", Android_Tools_Dir)
         #set tools bin to path
 
-        sys.stdout.write("Setting tools bin dir to PATH\n", True)
+        sys.stdout.write("Setting tools bin dir to PATH\n",True)
         Add_To_Path("PATH", Android_Tools_bin_Dir)
         #set platforms_tools
 
-        sys.stdout.write("Setting platform-tools dir to PATH\n", True)
+        sys.stdout.write("Setting platform-tools dir to PATH\n",True)
         Add_To_Path("PATH", Android_Platform_Tools_Dir)
         #ANT_HOME
 
-        sys.stdout.write("Setting ANT_HOME to Environmental variable\n", True)
+        sys.stdout.write("Setting ANT_HOME to Environmental variable\n",True)
         ANT_HOME = Downloaded_Path + os.sep + 'apache-ant-1.10.7' + os.sep + 'bin'
         Add_To_Path("ANT_HOME", ANT_HOME)
         #M2_HOME
 
-        sys.stdout.write("Setting M2_HOME to Environmental variable\n", True)
+        sys.stdout.write("Setting M2_HOME to Environmental variable\n",True)
         M2_HOME = Downloaded_Path + os.sep + "apache-maven-3.6.2"
         Add_To_Path("M2_HOME", M2_HOME)      
         #M2
 
-        sys.stdout.write("Setting maven to Environmental variable\n", True)
+        sys.stdout.write("Setting maven to Environmental variable\n",True)
         M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
         Add_To_Path("M2", M2)   
         #M2 to PATH
 
-        sys.stdout.write("Setting maven to PATH\n", True)
+        sys.stdout.write("Setting maven to PATH\n",True)
         M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
         Add_To_Path("PATH", M2)   
         
@@ -463,7 +500,7 @@ def Android_SDK_PATH():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False  
 
 
@@ -472,12 +509,12 @@ def Android_SDK(upgrade=False):
     try:
         sdk_check = Check_If_ANDROID_SDK_Installed()
         if sdk_check == False:
-            sys.stdout.write("Please Download and Install Android Studio from https://developer.android.com/studio/")
-            sys.stdout.write("\nSet the environment variables accordingly")
-            webbrowser.open_new('https://developer.android.com/studio/')
+            sys.stdout.write("Please Download and Install Android Studio from https://developer.android.com/studio/",True)
+            sys.stdout.write("\nSet the environment variables accordingly",True)
+            webbrowser.open_new('https://developer.android.com/studio/',True)
             return False
         else:
-            sys.stdout.write("Android SDK for ZeuZ is already Installed.\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Android SDK for ZeuZ is already Installed.\n",True) # Print to terminal window, and log file
             #setting SDK paths
             Android_SDK_PATH()
             #we need to  investigate this further
@@ -488,18 +525,18 @@ def Android_SDK(upgrade=False):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False    
 
 def Check_If_ANDROID_SDK_Installed():
     try:
-        if (os.path.isdir(Android_Home_Dir) and os.path.isdir(Android_Tools_Dir) and os.path.isdir(Android_Platform_Tools_Dir) and os.path.isdir(Android_Build_Tools_Dir)) :
+        if (os.path.isdir(Android_Home_Dir) and os.path.isdir(Android_Tools_Dir) and os.path.isdir(Android_Platform_Tools_Dir)):
 
-            sys.stdout.write("Android SDK for zeuz is setup \n", True)
+            sys.stdout.write("Android SDK for zeuz is setup \n",True)
             
             return True
         else:
-            sys.stdout.write("Android SDK for zeuz is not found\n", True)
+            sys.stdout.write("Android SDK for zeuz is not found\n",True)
             
             return False
     except Exception as e:
@@ -507,9 +544,8 @@ def Check_If_ANDROID_SDK_Installed():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
-        return False    
-
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
+        return False   
 
     
 def Upgrade_Android_SDK():
@@ -520,7 +556,7 @@ def Upgrade_Android_SDK():
             #remove any old tools file
             if os.path.exists(Temp_Tools_Dir) == True:
    
-                sys.stdout.write("Existing folder found.. will delete: %s\n"%Temp_Tools_Dir, True)
+                sys.stdout.write("Existing folder found.. will delete: %s\n"%Temp_Tools_Dir,True)
                 
                 shutil.rmtree(Temp_Tools_Dir)
             
@@ -543,7 +579,7 @@ def Upgrade_Android_SDK():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False    
 
 def Install_NodeJS(upgrade=False):
@@ -571,7 +607,7 @@ def Install_NodeJS(upgrade=False):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False        
      
  
@@ -579,43 +615,43 @@ def Install_Appium(upgrade=False):
     try:
         #check if NPM is installed
         #print "Checking pre-req for Appium installer"
-        sys.stdout.write("Checking pre-req for Appium installer\n", True)
+        sys.stdout.write("Checking pre-req for Appium installer\n",True)
                 
         npm_check = Check_If_NPM_Installed()
         if npm_check == False:
             sys.stdout.write("Installing: NPM\n", True) # Print to terminal window, and log file
-            sys.stdout.write("NodeJS is not installed.  We will install it\n", True)
+            sys.stdout.write("NodeJS is not installed.  We will install it\n",True)
             #print "NodeJS is not installed.  We will install it"
             Install_NodeJS()
             
-            sys.stdout.write("Installing appium via NPM\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Installing appium via NPM\n",True) # Print to terminal window, and log file
             #print "Installing appium via NPM"
             
             appium_installer = 'npm install -g appium'
             #print "Installing appium... This may take several minutes"
             
-            sys.stdout.write("Installing appium... This may take several minutes\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Installing appium... This may take several minutes\n",True) # Print to terminal window, and log file
             Installer_Result = subprocess.check_call(appium_installer, shell = True)
             #print "Adding appium to the path"
-            sys.stdout.write("Adding appium to the path\n", True)
+            sys.stdout.write("Adding appium to the path\n",True)
             Add_To_Path("PATH",appium_path)
             #print "Completed appium installer..."
-            sys.stdout.write("Completed appium installer...\n", True)
+            sys.stdout.write("Completed appium installer...\n",True)
             return True
         else:
             check_appium = Check_If_Appium_Installed()
             if check_appium == True:
                 return True
             
-            sys.stdout.write("Installing: Appium\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Installing: Appium\n",True) # Print to terminal window, and log file
             appium_installer = 'npm install -g appium'
             #print "Installing appium... This may take several minutes"
-            sys.stdout.write("Installing appium... This may take several minutes\n", True) # Print to terminal window, and log file
+            sys.stdout.write("Installing appium... This may take several minutes\n",True) # Print to terminal window, and log file
             Installer_Result = subprocess.check_call(appium_installer, shell = True)
-            sys.stdout.write("Adding appium to the path\n", True)
+            sys.stdout.write("Adding appium to the path\n",True)
             #print "Adding appium to the path"
             Add_To_Path("PATH",appium_path)
-            sys.stdout.write("Completed appium installer...\n", True)
+            sys.stdout.write("Completed appium installer...\n",True)
             return True
             #print "Completed appium installer..."
     except Exception as e:
@@ -623,20 +659,20 @@ def Install_Appium(upgrade=False):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
  
 def Check_If_NPM_Installed():
     try:
         try:
             #print "Checking if NPM is installed..."
-            sys.stdout.write("Checking if NPM is installed...\n", True)
+            sys.stdout.write("Checking if NPM is installed...\n",True)
             npm_check = subprocess.check_output(["node", "-v"], stderr=subprocess.STDOUT)
-            sys.stdout.write("NPM version: %s is installed\n"%npm_check, True) # Print to terminal window, and log file
+            sys.stdout.write("NPM version: %s is installed\n"%npm_check,True) # Print to terminal window, and log file
         
             return True
         except:
-            sys.stdout.write("NPM is not installed", True)
+            sys.stdout.write("NPM is not installed",True)
             #print "NPM is not installed"
             return False
     except Exception as e:
@@ -644,38 +680,38 @@ def Check_If_NPM_Installed():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False        
 
 def Check_If_Appium_Installed():
     try:
         try:
             #print "Checking if Appium is installed..."
-            sys.stdout.write("Checking if Appium is installed...\n", True)
+            sys.stdout.write("Checking if Appium is installed...\n",True)
             appium_check = "False"
             appium_check = subprocess.check_output(["where", "appium"], stderr=subprocess.STDOUT)
-            sys.stdout.write("Appium is installed %s\n"%appium_check, True)
+            sys.stdout.write("Appium is installed %s\n"%appium_check,True)
 
             return True
         except:
             print("Appium is not installed")
-            sys.stdout.write("Appium is not installed\n", True)
-            sys.stdout.write("Checking to see if we can locate appium in appdata folder\n", True)
+            sys.stdout.write("Appium is not installed\n",True)
+            sys.stdout.write("Checking to see if we can locate appium in appdata folder\n",True)
 
             if (os.path.isdir(appium_path)):
-                sys.stdout.write("found in appdata folder.  setting it to path\n", True)
+                sys.stdout.write("found in appdata folder.  setting it to path\n",True)
                 Add_To_Path("PATH", appium_path)
-                sys.stdout.write("Added appium to your path..\n", True)
+                sys.stdout.write("Added appium to your path..\n",True)
                 return True
             else:
-                sys.stdout.write("Appium is not found under appdata folder\n", True)
+                sys.stdout.write("Appium is not found under appdata folder\n",True)
                 return False
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
  
 def Get_Current_Logged_User():
@@ -689,12 +725,12 @@ def Get_Current_Logged_User():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
 
 def Add_To_Path(PATH_NAME,value):
     try:
-        sys.stdout.write("Adding path: '%s' to windows system environment with value: %s\n"%(PATH_NAME,value), True) # Print to terminal window, and log file
+        sys.stdout.write("Adding path: '%s' to windows system environment with value: %s\n"%(PATH_NAME,value),True) # Print to terminal window, and log file
         result_path_check = Check_If_in_Path(PATH_NAME,value)
         if result_path_check ==True:
             return True
@@ -706,7 +742,7 @@ def Add_To_Path(PATH_NAME,value):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False        
 
 
@@ -742,7 +778,7 @@ def Check_If_in_Path(PATH_NAME,value):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print("Environmental Variable provided '%s' does not exists"%( PATH_NAME))
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
           
 def Update_Sys_Env_Variable(PATH_NAME,my_value):
@@ -786,7 +822,7 @@ def Update_Sys_Env_Variable(PATH_NAME,my_value):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print("Environmental Variable provided '%s' does not exists"%( PATH_NAME))
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
 
 def Create_UI_Automator_Shortcut():
@@ -805,7 +841,7 @@ def Create_UI_Automator_Shortcut():
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail)
+        sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
         return False
 
 def Create_ZeuZ_Node_Shortcut():
@@ -824,7 +860,7 @@ def Create_ZeuZ_Node_Shortcut():
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail)
+        sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
         return False
 
 
@@ -848,45 +884,45 @@ def main(rungui = False):
     # Install
     if Check_Pre_Req():
 
-        sys.stdout.error("\n 1. Please note that if you have duplicate JDK or newer than 1.8 JAVA Appium will not work.\n")
-        sys.stdout.error("\n 2. You must be logged in as Admin.  If you run as admin, appium installer will NOT WORK.\n")
-        sys.stdout.error("\n 3. If you have spaces in your user name, Appium will not work.  Create new user with admin permission with no spaces.\n")
-        sys.stdout.error("\n 4. Make sure you uninstall all other Java versions and remove any java version from Environmental Variable.\n")   
-        sys.stdout.error("\n 5. We will download a known JDK version (JDK 1.8) that is compatible and install it for you.\n")  
-        sys.stdout.error("\n 6. If you have an older Android Studio. Make sure you upgrade it to latest before running this.\n")  
+        sys.stdout.write("\n 1. Please note that if you have duplicate JDK or newer than 1.8 JAVA Appium will not work.\n",True)
+        sys.stdout.write("\n 2. You must be logged in as Admin.  If you run as admin, appium installer will NOT WORK.\n",True)
+        sys.stdout.write("\n 3. If you have spaces in your user name, Appium will not work.  Create new user with admin permission with no spaces.\n",True)
+        sys.stdout.write("\n 4. Make sure you uninstall all other Java versions and remove any java version from Environmental Variable.\n",True)   
+        sys.stdout.write("\n 5. We will download a known JDK version (JDK 1.8) that is compatible and install it for you.\n",True)  
+        sys.stdout.write("\n 6. If you have an older Android Studio. Make sure you upgrade it to latest before running this.\n",True)  
         Java_Installer = Install_JDK()
         
         if Java_Installer == False:
-            sys.stdout.error("\nWe were unable to install JDK 1.8. Please install JDK 1.8 manually and run again")
+            sys.stdout.error("\nWe were unable to install JDK 1.8. Please install JDK 1.8 manually and run again",True)
            
             return False
             
-
-        Android_Studio = Android_SDK()
+        Android_Studio = True
+        Android_Studio = Auto_locate_Android_Studio()
         
         if Android_Studio == False:
-            sys.stdout.error("\nAndroid Studio is not installed.")
-            sys.stdout.error("\n 1. Download and Install Android Studio.")
-            sys.stdout.error("\n 2. You must run Android Studio once.  It will download additional tools for Appium to work.")
-            sys.stdout.error("\n 3. Quit this installer and close all other programs.")
-            sys.stdout.error("\n 4. Run Android Studio and start a blank project.")
-            sys.stdout.error("\n 5. Wait for all Android Studio components to finish download and install.")
-            sys.stdout.error("\n 6. You must Quit ZeuZ Node Installer and Re-Run Android Setup.")
-            sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai")
+            sys.stdout.error("\nAndroid Studio is not installed.",True)
+            sys.stdout.error("\n 1. Download and Install Android Studio.",True)
+            sys.stdout.error("\n 2. You must run Android Studio once.  It will download additional tools for Appium to work.",True)
+            sys.stdout.error("\n 3. Quit this installer and close all other programs.",True)
+            sys.stdout.error("\n 4. Run Android Studio and start a blank project.",True)
+            sys.stdout.error("\n 5. Wait for all Android Studio components to finish download and install.",True)
+            sys.stdout.error("\n 6. You must Quit ZeuZ Node Installer and Re-Run Android Setup.",True)
+            sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai",True)
             return False
         
         
         Appium_Install_Result = Install_Appium()
         if Appium_Install_Result == False:
-            sys.stdout.error("\nWe were unable to install Appium.")
-            sys.stdout.error("\n 1. Make sure you do not have duplicate java installer.  Appium works only with JDK 1.8")
-            sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai")
+            sys.stdout.error("\nWe were unable to install Appium.",True)
+            sys.stdout.error("\n 1. Make sure you do not have duplicate java installer.  Appium works only with JDK 1.8",True)
+            sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai",True)
             return False            
         
 
     # Clean up logger, and reinstate STDOUT/ERR
     else:
-        sys.stdout.error("check installation of python version 3.8")
+        sys.stdout.error("check installation of python version 3.8",True)
     CommonUtils.Logger_Teardown(logfile)
 
 
