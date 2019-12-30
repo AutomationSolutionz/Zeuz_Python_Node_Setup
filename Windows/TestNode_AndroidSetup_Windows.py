@@ -910,8 +910,31 @@ def main(rungui = False):
             sys.stdout.error("\n 6. You must Quit ZeuZ Node Installer and Re-Run Android Setup.",True)
             sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai",True)
             return False
+        else:
+             #create a shortcut ui automator 
+            try:
+                sys.stdout.write("\n Creating short cut for android UIAutomatorViewer",True)
+                from pyshortcuts import make_shortcut
+                Android_UI_Inspection = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk" +os.sep+"tools"+os.sep+"bin"+os.sep+"uiautomatorviewer.bat")
+    
+                target = Android_UI_Inspection
+  
+                
+                
+                current_script_path = '%s'%(sys.path[0])
+                ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"androidInsep.ico"
+ 
+                create_shortcuts(shortcut_name="Zeuz Node",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
+
+    
+    
+            except Exception as e:
+                print("Shortcut Exception: ", e)
+                sys.stdout.error("\n Unable to create ZeuZ Short Cut\n")
+            
+
         
-        
+
         Appium_Install_Result = Install_Appium()
         if Appium_Install_Result == False:
             sys.stdout.error("\nWe were unable to install Appium.",True)

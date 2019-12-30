@@ -76,14 +76,21 @@ def move_zeuznode():
         try:
             from pyshortcuts import make_shortcut
 
-            Node_file = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node" + os.sep + "ZeuZ_Node.py"
-            target = Node_file
+            Node_file_gui = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node" + os.sep + "node_gui.py"
+            Node_file_cli = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node" + os.sep + "node_cli.py"
+            target_gui = Node_file_gui
+            target_cli = Node_file_cli
+            
+            
             current_script_path = '%s'%(sys.path[0])
             ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"zeuz.ico"
             if sys.platform == 'win32':
-                create_shortcuts(shortcut_name="Zeuz Node",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
+                create_shortcuts(shortcut_name="Zeuz Node",target_exe_path=target_gui,startin=None,icon_path=ZeuZ_Icon_Path)
+                create_shortcuts(shortcut_name="Zeuz Node",target_exe_path=target_cli,startin=None,icon_path=ZeuZ_Icon_Path)
+            
             else:
-                make_shortcut(target, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
+                make_shortcut(target_gui, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
+                make_shortcut(target_cli, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
 
 
         except Exception as e:
