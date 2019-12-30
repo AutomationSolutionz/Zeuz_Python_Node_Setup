@@ -116,6 +116,9 @@ def Unzip_All_folders_files(zip_file_location, destination_folder):
         print(Error_Detail)
         return False
 
+
+
+
 def Auto_locate_Android_Studio():
     try:
         android_where_output_str = ""
@@ -924,7 +927,7 @@ def main(rungui = False):
                 current_script_path = '%s'%(sys.path[0])
                 ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"androidInsep.ico"
  
-                create_shortcuts(shortcut_name="Zeuz Node",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
+                create_shortcuts(shortcut_name="AndroidUIInspector",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
 
     
     
@@ -950,7 +953,22 @@ def main(rungui = False):
 
 
 if __name__=="__main__":
-
+    
+    def create_shortcuts(shortcut_name, target_exe_path, startin, icon_path):
+        import winshell
+        from win32com.client import Dispatch
+    
+        if startin is None:
+            startin = winshell.desktop()
+    
+        shell = Dispatch('WScript.Shell')
+        shortcut_file = os.path.join(winshell.desktop(), shortcut_name + '.lnk')
+        shortcut = shell.CreateShortCut(shortcut_file)
+        shortcut.Targetpath = target_exe_path
+        shortcut.WorkingDirectory = startin
+        shortcut.IconLocation = icon_path
+        shortcut.save()
+        
     main()
     
     input("Press ENTER to exit")
