@@ -847,7 +847,7 @@ def Create_UI_Automator_Shortcut():
         sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
         return False
 
-def Create_ZeuZ_Node_Shortcut():
+def Create_Android_UI_Inspector_Shortcut():
     try:
         # this function will create a short cut on user's desktop for UI Automator
         desktop = winshell.desktop()
@@ -918,23 +918,33 @@ def main(rungui = False):
             try:
                 sys.stdout.write("\n Creating short cut for android UIAutomatorViewer",True)
                 from pyshortcuts import make_shortcut
+                import winshell
+                from win32com.client import Dispatch
                 Android_UI_Inspection = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk" +os.sep+"tools"+os.sep+"bin"+os.sep+"uiautomatorviewer.bat")
-    
-                target = Android_UI_Inspection
-  
-                
-                
+                target_exe_path = Android_UI_Inspection
                 current_script_path = '%s'%(sys.path[0])
-                ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"androidInsep.ico"
+                UiAutomator_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"androidInsep.ico"
+                shortcut_name="AndroidUIInspector"
+                startin = winshell.desktop()
+                shell = Dispatch('WScript.Shell')
+                shortcut_file = os.path.join(winshell.desktop(), shortcut_name + '.lnk')
+                shortcut = shell.CreateShortCut(shortcut_file)
+                shortcut.Targetpath = target_exe_path
+                shortcut.WorkingDirectory = startin
+                shortcut.IconLocation = UiAutomator_Icon_Path
+                shortcut.save()
+                sys.stdout.write("\n Successfully created short cut for android UIAutomatorViewer",True)
+    
  
-                create_shortcuts(shortcut_name="AndroidUIInspector",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
 
-    
-    
             except Exception as e:
-                print("Shortcut Exception: ", e)
-                sys.stdout.error("\n Unable to create ZeuZ Short Cut\n")
-            
+                exc_type, exc_obj, exc_tb = sys.exc_info()        
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+                sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
+
+
+         
 
         
 
@@ -952,24 +962,9 @@ def main(rungui = False):
     CommonUtils.Logger_Teardown(logfile)
 
 
+
 if __name__=="__main__":
-    
-    def create_shortcuts(shortcut_name, target_exe_path, startin, icon_path):
-        import winshell
-        from win32com.client import Dispatch
-    
-        if startin is None:
-            startin = winshell.desktop()
-    
-        shell = Dispatch('WScript.Shell')
-        shortcut_file = os.path.join(winshell.desktop(), shortcut_name + '.lnk')
-        shortcut = shell.CreateShortCut(shortcut_file)
-        shortcut.Targetpath = target_exe_path
-        shortcut.WorkingDirectory = startin
-        shortcut.IconLocation = icon_path
-        shortcut.save()
-        
+         
     main()
     
     input("Press ENTER to exit")
-
