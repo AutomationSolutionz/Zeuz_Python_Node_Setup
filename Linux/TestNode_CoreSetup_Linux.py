@@ -17,12 +17,12 @@ logfile = "TestNode_Core_Logs.log"
 
 # Libraries and modules to be installed
 apt_get_module_list = ["python3-pip", "python3-tk", "python3-setuptools", "libxss1", "libappindicator1",
-                       "libindicator7", "python3-dateutil", "python3-xlib", "python3-gi", "curl"]
-pip_module_list = ["pip", "psutil", "pillow", "pyserial", "numpy", "imutils", "urllib3", "selenium",
-                   "uiautomator", "requests", "wheel","colorama",
+                       "libindicator7" , "python3-gi", "curl"]
+pip_module_list = ["pip", "psutil", "pillow", "pyserial", "python-dateutil", "python-xlib", "numpy", "imutils", "urllib3", "selenium",
+                   "uiautomator", "requests", "wheel","colorama","beautifulsoup4",
                    "pyautogui", "Appium-Python-Client", "lxml", "xlrd", "pyscreenshot", "futures", "image",
                    "tzlocal", "pyautocad", "PyPDF2",
-                   "pyshortcuts"]
+                   "pyshortcuts", "datefinder", "regex","pyttsx3"]
 
 # Commands that help with installation
 install_str = "pip3 install -U"
@@ -34,7 +34,7 @@ def install(type="", module_name="", module_version=None, cmd=""):
     command = ""
 
     if type == "pip":
-        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
+        command = '%s %s' % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
         print("Installing: %s " % command.replace(sudo_pass, '*****'))
@@ -195,7 +195,7 @@ def Install_Firefox_Drivers():
 def Install_Easy_Installer():
     try:
 
-        items_to_install = ['hashlib', 'https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
+        items_to_install = ['https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
 
         for each in items_to_install:
             try:

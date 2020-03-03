@@ -31,7 +31,7 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
     command = ""
 
     if type == "pip":
-        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
+        command = '%s %s' % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
         print("Installing: %s " %command.replace(sudo_pass, '*****'))

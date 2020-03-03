@@ -7,7 +7,7 @@ import sys
 import subprocess
 import getpass
 
-install_str = "sudo pip install -U"
+install_str = "pip3 install -U"
 sudo_pass = ''
 logfile = "TestNode_iOS_Logs.log"
 

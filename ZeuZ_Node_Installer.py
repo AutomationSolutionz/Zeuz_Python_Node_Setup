@@ -5,7 +5,7 @@
 import getpass,subprocess
 
 sudo_pass = ''
-install_str = "pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U"
+install_str = "pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U"
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -50,7 +50,7 @@ def install(type="", module_name="", module_version=None, cmd=""):
     command = ""
 
     if type == "pip":
-        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str, module_name)
+        command = '%s %s' % (install_str, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
 
@@ -117,9 +117,9 @@ def get_required_mods():
             #install(cmd="wget https://bootstrap.pypa.io/get-pip.py")
             #install(type="sudo", cmd="python get-pip.py")
 
-            install(type="sudo", cmd="pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests")
-            install(type="sudo", cmd="pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org image")
-            install(type="sudo", cmd="pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org tzlocal")
+            install(type="sudo", cmd="pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org requests")
+            install(type="sudo", cmd="pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org image")
+            install(type="sudo", cmd="pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org tzlocal")
 
 
 

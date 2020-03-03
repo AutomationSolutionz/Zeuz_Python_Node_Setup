@@ -45,10 +45,82 @@ global install_node_file
 
 
 
-
 npm_path = os.environ["ProgramW6432"]+os.sep+ "nodejs"
 appium_path = os.getenv('APPDATA') + os.sep + "npm" + os.sep + "appium"
 #Android_Home_Dir  =  expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk"
+     
+Android_Home_Dir = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk")    
+Android_Tools_bin_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
+Android_Tools_Dir = Android_Home_Dir + os.sep + "tools"
+Android_Platform_Tools_Dir = Android_Home_Dir + os.sep + "platform-tools"
+# - not needed anymore with new android Android_Build_Tools_Dir = Android_Home_Dir + os.sep + "build-tools"
+Downloaded_Path = expanduser("~")+os.sep + "Downloads" 
+Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
+logfile = "TestNode_Android_Logs.log"
+
+current_script_path = '%s'%(sys.path[0])
+#Updated Oct 26, 2019
+installer_jdk_file_part_1  = "jdk-8u231-windows-x64.sfx.part1.exe"
+installer_jdk_file_part_2  = "jdk-8u231-windows-x64.sfx.part2.rar"
+installer_jdk_file_part_3  = "jdk-8u231-windows-x64.sfx.part3.rar"
+installer_jdk_file_name = r"jdk-8u231-windows-x64.exe"
+install_node_file = 'node-v10.15.3-x64.msi'
+
+
+ 
+
+def Android_SDK_PATH(Android_Home_Dir):
+    try:            
+        #set android home path
+
+        sys.stdout.write("Setting ANDROID_HOME to Environmental variable\n",True)      
+        #Android_Home_Dir = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk")    
+        Android_Tools_bin_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
+        Android_Tools_Dir = Android_Home_Dir + os.sep + "tools"
+        Android_Platform_Tools_Dir = Android_Home_Dir + os.sep + "platform-tools"
+        
+
+        Add_To_Path("ANDROID_HOME", Android_Home_Dir)
+        #set tools to path
+
+        sys.stdout.write("Setting tools dir to PATH\n",True)
+        Add_To_Path("PATH", Android_Tools_Dir)
+        #set tools bin to path
+
+        sys.stdout.write("Setting tools bin dir to PATH\n",True)
+        Add_To_Path("PATH", Android_Tools_bin_Dir)
+        #set platforms_tools
+
+        sys.stdout.write("Setting platform-tools dir to PATH\n",True)
+        Add_To_Path("PATH", Android_Platform_Tools_Dir)
+        #ANT_HOME
+
+        sys.stdout.write("Setting ANT_HOME to Environmental variable\n",True)
+        ANT_HOME = Downloaded_Path + os.sep + 'apache-ant-1.10.7' + os.sep + 'bin'
+        Add_To_Path("ANT_HOME", ANT_HOME)
+        #M2_HOME
+
+        sys.stdout.write("Setting M2_HOME to Environmental variable\n",True)
+        M2_HOME = Downloaded_Path + os.sep + "apache-maven-3.6.2"
+        Add_To_Path("M2_HOME", M2_HOME)      
+        #M2
+
+        sys.stdout.write("Setting maven to Environmental variable\n",True)
+        M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
+        Add_To_Path("M2", M2)   
+        #M2 to PATH
+
+        sys.stdout.write("Setting maven to PATH\n",True)
+        M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
+        Add_To_Path("PATH", M2)   
+        
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print(Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
+        return False  
 
 
 
@@ -117,6 +189,116 @@ def Unzip_All_folders_files(zip_file_location, destination_folder):
         return False
 
 
+def Get_Current_Logged_User():
+    sModuleInfo = inspect.stack()[0][3] + " : " + inspect.getmodulename(__file__)
+    try:
+        #works on all platoform
+        current_user_name = getpass.getuser()
+        return current_user_name
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print(Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
+        return False
+
+def Add_To_Path(PATH_NAME,value):
+    try:
+        sys.stdout.write("Adding path: '%s' to windows system environment with value: %s\n"%(PATH_NAME,value),True) # Print to terminal window, and log file
+        result_path_check = Check_If_in_Path(PATH_NAME,value)
+        if result_path_check ==True:
+            return True
+        
+        Update_Sys_Env_Variable(PATH_NAME,value)
+        
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print(Error_Detail)
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
+        return False        
+
+
+def Check_If_in_Path(PATH_NAME,value):
+    print("Checking if %s is already in %s"%(value, PATH_NAME))
+    try:
+        try:
+            #we will always set the path in run time just to be on the same side
+            if PATH_NAME == "PATH":
+                current_value = os.environ['PATH']
+                path_list = current_value.split(";")
+                if value not in path_list:
+                    os.environ['PATH'] += ';'+value
+            else:
+                os.environ[PATH_NAME] = value
+        except:
+            pass
+        reg_path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+        reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
+        try:
+            system_environment_variables = winreg.QueryValueEx(reg_key, PATH_NAME)[0]
+        except:
+            print("Value = '%s' is not found.  We will add it."%value)
+            return False
+        if value in system_environment_variables:
+            print("Value = '%s' already exists under %s"%(value, PATH_NAME))
+            return True
+        else:
+            print("Value = '%s' is not found.  We will add it."%value)
+            return False
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print("Environmental Variable provided '%s' does not exists"%( PATH_NAME))
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
+        return False
+          
+def Update_Sys_Env_Variable(PATH_NAME,my_value):
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 0, winreg.KEY_ALL_ACCESS) 
+        try:
+            value, _ = winreg.QueryValueEx(key, PATH_NAME)
+        except WindowsError as e:
+            # in case the PATH variable is undefined
+            print("Env Variable WindowsError Exception: {}".format(e))
+            value = ''
+        if PATH_NAME != "PATH":
+            value = my_value
+        else:
+            #we always append PATH
+            value_list = value.split(";")
+            if my_value in value_list:
+                print("Already there")
+                return True
+            else:
+                value = value + ";" + my_value
+        # write it back
+        winreg.SetValueEx(key, PATH_NAME, 0, winreg.REG_EXPAND_SZ, value)
+        winreg.CloseKey(key)
+
+        # notify the system about the changes
+        win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, 'Environment')
+        # we will add python path again to be on the safe side
+        try:    
+            if PATH_NAME == "PATH":
+                current_value = os.environ['PATH']
+                path_list = current_value.split(";")
+                if my_value not in value_list:
+                    os.environ['PATH'] += ';'+my_value
+            else:
+                os.environ[PATH_NAME] = my_value
+        except:
+            True
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+        print("Environmental Variable provided '%s' does not exists"%( PATH_NAME))
+        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
+        return False
 
 
 def Auto_locate_Android_Studio():
@@ -128,9 +310,13 @@ def Auto_locate_Android_Studio():
         android_where_output_str = str(android_where_output_bytes, 'utf-8')
         if android_where_output_str != "":
             sys.stdout.write ("\nFound adb under: %s\n"%android_where_output_str, True)
+            Android_Home_Dir = (android_where_output_str.split("platform-tools")[0].rstrip(os.sep))
+            Android_SDK_PATH(Android_Home_Dir)
             return True
         elif os.path.exists(expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk")  == True: 
             sys.stdout.write ("\nFound Android under default path: %s "%(expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk"),True)
+            Android_Home_Dir = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk")
+            Android_SDK_PATH(Android_Home_Dir)
             return True
         else:
             sys.stdout.write ("\nZeuZ will download a light version of Android SDK for Appium to work in the default Android Studio location: %s\n"%(expanduser("~")+os.sep + "AppData" + os.sep +  "Local" +os.sep + "Android"),True)
@@ -142,6 +328,8 @@ def Auto_locate_Android_Studio():
                 sys.stdout.error ("\n Unable to download Android SDK of ZeuZ Version\n",True)
                 return False
             unzip_status = Unzip_All_folders_files(zip_downloaded_file, destination_folder)  
+            Android_Home_Dir = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk")
+            Android_SDK_PATH(Android_Home_Dir)
             return unzip_status
             
                      
@@ -153,25 +341,7 @@ def Auto_locate_Android_Studio():
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False  
 
-      
-Android_Home_Dir = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local"+os.sep + "Android" + os.sep +"Sdk")    
-Android_Tools_bin_Dir = Android_Home_Dir + os.sep + "tools" + os.sep + "bin"
-Android_Tools_Dir = Android_Home_Dir + os.sep + "tools"
-Android_Platform_Tools_Dir = Android_Home_Dir + os.sep + "platform-tools"
-# - not needed anymore with new android Android_Build_Tools_Dir = Android_Home_Dir + os.sep + "build-tools"
-Downloaded_Path = expanduser("~")+os.sep + "Downloads" 
-Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
-logfile = "TestNode_Android_Logs.log"
-
-current_script_path = '%s'%(sys.path[0])
-#Updated Oct 26, 2019
-installer_jdk_file_part_1  = "jdk-8u231-windows-x64.sfx.part1.exe"
-installer_jdk_file_part_2  = "jdk-8u231-windows-x64.sfx.part2.rar"
-installer_jdk_file_part_3  = "jdk-8u231-windows-x64.sfx.part3.rar"
-installer_jdk_file_name = r"jdk-8u231-windows-x64.exe"
-install_node_file = 'node-v10.15.3-x64.msi'
-
-
+ 
 
 def detect_admin():
     # Windows only - Return True if program run as admin
@@ -456,57 +626,7 @@ def JAVA_PATH():
         return False
 
  
-  
-
-def Android_SDK_PATH():
-    try:            
-        #set android home path
-
-
-        sys.stdout.write("Setting ANDROID_HOME to Environmental variable\n",True)
-        Add_To_Path("ANDROID_HOME", Android_Home_Dir)
-        #set tools to path
-
-        sys.stdout.write("Setting tools dir to PATH\n",True)
-        Add_To_Path("PATH", Android_Tools_Dir)
-        #set tools bin to path
-
-        sys.stdout.write("Setting tools bin dir to PATH\n",True)
-        Add_To_Path("PATH", Android_Tools_bin_Dir)
-        #set platforms_tools
-
-        sys.stdout.write("Setting platform-tools dir to PATH\n",True)
-        Add_To_Path("PATH", Android_Platform_Tools_Dir)
-        #ANT_HOME
-
-        sys.stdout.write("Setting ANT_HOME to Environmental variable\n",True)
-        ANT_HOME = Downloaded_Path + os.sep + 'apache-ant-1.10.7' + os.sep + 'bin'
-        Add_To_Path("ANT_HOME", ANT_HOME)
-        #M2_HOME
-
-        sys.stdout.write("Setting M2_HOME to Environmental variable\n",True)
-        M2_HOME = Downloaded_Path + os.sep + "apache-maven-3.6.2"
-        Add_To_Path("M2_HOME", M2_HOME)      
-        #M2
-
-        sys.stdout.write("Setting maven to Environmental variable\n",True)
-        M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
-        Add_To_Path("M2", M2)   
-        #M2 to PATH
-
-        sys.stdout.write("Setting maven to PATH\n",True)
-        M2 = Downloaded_Path + os.sep + "apache-maven-3.6.2" + os.sep + "bin"
-        Add_To_Path("PATH", M2)   
-        
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
-        return False  
-
-
+ 
          
 def Android_SDK(upgrade=False):    
     try:
@@ -717,116 +837,6 @@ def Check_If_Appium_Installed():
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
  
-def Get_Current_Logged_User():
-    sModuleInfo = inspect.stack()[0][3] + " : " + inspect.getmodulename(__file__)
-    try:
-        #works on all platoform
-        current_user_name = getpass.getuser()
-        return current_user_name
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
-        return False
-
-def Add_To_Path(PATH_NAME,value):
-    try:
-        sys.stdout.write("Adding path: '%s' to windows system environment with value: %s\n"%(PATH_NAME,value),True) # Print to terminal window, and log file
-        result_path_check = Check_If_in_Path(PATH_NAME,value)
-        if result_path_check ==True:
-            return True
-        
-        Update_Sys_Env_Variable(PATH_NAME,value)
-        
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print(Error_Detail)
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
-        return False        
-
-
-def Check_If_in_Path(PATH_NAME,value):
-    print("Checking if %s is already in %s"%(value, PATH_NAME))
-    try:
-        try:
-            #we will always set the path in run time just to be on the same side
-            if PATH_NAME == "PATH":
-                current_value = os.environ['PATH']
-                path_list = current_value.split(";")
-                if value not in path_list:
-                    os.environ['PATH'] += ';'+value
-            else:
-                os.environ[PATH_NAME] = value
-        except:
-            pass
-        reg_path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-        reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
-        try:
-            system_environment_variables = winreg.QueryValueEx(reg_key, PATH_NAME)[0]
-        except:
-            print("Value = '%s' is not found.  We will add it."%value)
-            return False
-        if value in system_environment_variables:
-            print("Value = '%s' already exists under %s"%(value, PATH_NAME))
-            return True
-        else:
-            print("Value = '%s' is not found.  We will add it."%value)
-            return False
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print("Environmental Variable provided '%s' does not exists"%( PATH_NAME))
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
-        return False
-          
-def Update_Sys_Env_Variable(PATH_NAME,my_value):
-    try:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 0, winreg.KEY_ALL_ACCESS) 
-        try:
-            value, _ = winreg.QueryValueEx(key, PATH_NAME)
-        except WindowsError as e:
-            # in case the PATH variable is undefined
-            print("Env Variable WindowsError Exception: {}".format(e))
-            value = ''
-        if PATH_NAME != "PATH":
-            value = my_value
-        else:
-            #we always append PATH
-            value_list = value.split(";")
-            if my_value in value_list:
-                print("Already there")
-                return True
-            else:
-                value = value + ";" + my_value
-        # write it back
-        winreg.SetValueEx(key, PATH_NAME, 0, winreg.REG_EXPAND_SZ, value)
-        winreg.CloseKey(key)
-
-        # notify the system about the changes
-        win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, 'Environment')
-        # we will add python path again to be on the safe side
-        try:    
-            if PATH_NAME == "PATH":
-                current_value = os.environ['PATH']
-                path_list = current_value.split(";")
-                if my_value not in value_list:
-                    os.environ['PATH'] += ';'+my_value
-            else:
-                os.environ[PATH_NAME] = my_value
-        except:
-            True
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
-        print("Environmental Variable provided '%s' does not exists"%( PATH_NAME))
-        sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
-        return False
 
 def Create_UI_Automator_Shortcut():
     try:
@@ -847,7 +857,7 @@ def Create_UI_Automator_Shortcut():
         sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
         return False
 
-def Create_ZeuZ_Node_Shortcut():
+def Create_Android_UI_Inspector_Shortcut():
     try:
         # this function will create a short cut on user's desktop for UI Automator
         desktop = winshell.desktop()
@@ -915,26 +925,39 @@ def main(rungui = False):
             return False
         else:
              #create a shortcut ui automator 
+            
             try:
+                
+                
                 sys.stdout.write("\n Creating short cut for android UIAutomatorViewer",True)
                 from pyshortcuts import make_shortcut
+                import winshell
+                from win32com.client import Dispatch
                 Android_UI_Inspection = (expanduser("~")+os.sep + "AppData" + os.sep +  "Local" + os.sep + "Android" + os.sep + "Sdk" +os.sep+"tools"+os.sep+"bin"+os.sep+"uiautomatorviewer.bat")
-    
-                target = Android_UI_Inspection
-  
-                
-                
+                target_exe_path = Android_UI_Inspection
                 current_script_path = '%s'%(sys.path[0])
-                ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"androidInsep.ico"
+                UiAutomator_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"androidInsep.ico"
+                shortcut_name="AndroidUIInspector"
+                startin = winshell.desktop()
+                shell = Dispatch('WScript.Shell')
+                shortcut_file = os.path.join(winshell.desktop(), shortcut_name + '.lnk')
+                shortcut = shell.CreateShortCut(shortcut_file)
+                shortcut.Targetpath = target_exe_path
+                shortcut.WorkingDirectory = startin
+                shortcut.IconLocation = UiAutomator_Icon_Path
+                shortcut.save()
+                sys.stdout.write("\n Successfully created short cut for android UIAutomatorViewer",True)
+    
  
-                create_shortcuts(shortcut_name="AndroidUIInspector",target_exe_path=target,startin=None,icon_path=ZeuZ_Icon_Path)
 
-    
-    
             except Exception as e:
-                print("Shortcut Exception: ", e)
-                sys.stdout.error("\n Unable to create ZeuZ Short Cut\n")
-            
+                exc_type, exc_obj, exc_tb = sys.exc_info()        
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
+                sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
+
+
+         
 
         
 
@@ -952,24 +975,9 @@ def main(rungui = False):
     CommonUtils.Logger_Teardown(logfile)
 
 
+
 if __name__=="__main__":
-    
-    def create_shortcuts(shortcut_name, target_exe_path, startin, icon_path):
-        import winshell
-        from win32com.client import Dispatch
-    
-        if startin is None:
-            startin = winshell.desktop()
-    
-        shell = Dispatch('WScript.Shell')
-        shortcut_file = os.path.join(winshell.desktop(), shortcut_name + '.lnk')
-        shortcut = shell.CreateShortCut(shortcut_file)
-        shortcut.Targetpath = target_exe_path
-        shortcut.WorkingDirectory = startin
-        shortcut.IconLocation = icon_path
-        shortcut.save()
-        
+         
     main()
     
     input("Press ENTER to exit")
-

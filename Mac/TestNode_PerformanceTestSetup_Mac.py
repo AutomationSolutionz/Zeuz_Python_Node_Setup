@@ -15,7 +15,7 @@ from Crossplatform import CommonUtils
 sudo_pass = ''
 logfile = "TestNode_PerformanceTest_Logs.log"
 
-install_str_pip = "pip install -U"
+install_str_pip = "pip3 install -U"
 install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
@@ -64,7 +64,7 @@ def install(type="", module_name="", module_version=None, cmd=""):
             command = "%s==%s" % (command, module_version)
 
     elif type == "pip":
-        command = 'echo "%s" | %s %s' % (sudo_pass, install_str_pip, module_name)
+        command = '%s %s' % (install_str_pip, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
     elif type == "brew":

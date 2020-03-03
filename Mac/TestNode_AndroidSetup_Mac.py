@@ -6,7 +6,7 @@ import os
 import sys
 import subprocess
 
-install_str = "sudo pip install -U"
+install_str = "pip3 install -U"
 
 
 

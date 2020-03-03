@@ -15,16 +15,15 @@ from Crossplatform import CommonUtils
 sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
-install_str_pip = "pip install -U"
+install_str_pip = "pip3 install -U"
 install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
-easy_instal_list = ['https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip']
-
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "imutils", "simplejson", "urllib3", "selenium",
-                   "python-dateutil",
+                   "python-dateutil", "beautifulsoup4",
                    "requests", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
-                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts"]
+                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts", "datefinder", "regex","pyttsx3",
+                   "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", 'geckodriver']
 
@@ -63,12 +62,12 @@ def install(type="", module_name="", module_version=None, cmd=""):
     command = ""
 
     if type == "easy_install":
-        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str_easy_install, module_name)
+        command = '%s %s' % (install_str_easy_install, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
                     
     elif type == "pip":
-        command = 'echo "%s" | sudo -S %s %s' % (sudo_pass, install_str_pip, module_name)
+        command = '%s %s' % (install_str_pip, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)
     elif type == "brew":
@@ -115,20 +114,6 @@ def Installer_With_Pip():
             install(type="pip", module_name=each)
         except:
             sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-
-
-
-def Install_Easy_Installer():
-    for each in easy_instal_list:
-        try:
-            sys.stdout.write("Installing: %s\n" % each, True)  # Print to terminal window, and log file
-            install(type="easy_install", module_name=each)
-        except:
-            sys.stdout.error("\tAn error occured. See log file\n")  # Print to terminal window, and log file
-            print("Prolblem occured while installing %s" % each)
-
-
-
 
 
 def Install_Chrome_Drivers():
@@ -214,7 +199,6 @@ def main(rungui = False):
     # Install
     Install_Brew()
     Installer_With_Brew()
-    Install_Easy_Installer()
     #Install_Pip()
     Installer_With_Pip()
 
