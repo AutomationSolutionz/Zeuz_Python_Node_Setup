@@ -107,11 +107,11 @@ def install(type="", module_name="", module_version=None, cmd=""):
 def Installer_With_Pip():
     # upgrade pip itself
 
-    pip_module_list = ["pip", "clint", "pillow", "setuptools", "pyserial", "numpy", "imutils", "simplejson", "urllib3",
-                       "selenium", "uiautomator", "requests", "wheel", "python3-xlib", "pyautogui", "lxml", "xlrd",
+    pip_module_list = ["pip", "clint", "pillow", "setuptools", "pyserial", "numpy", "simplejson", "urllib3",
+                       "selenium", "uiautomator", "requests", "wheel", "pyautogui", "lxml",
                        "SpeechRecognition","colorama",
                        "python-dateutil", "Appium-Python-Client", "futures", "xlwings", "image", "tzlocal", "pyautocad",
-                       "PyPDF2","beautifulsoup4",
+                       "PyPDF2",
                        "pyshortcuts", "datefinder", "regex","pyttsx3",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/PyAudio-0.2.11-cp38-cp38-win32.whl",
                        "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip",
@@ -119,7 +119,7 @@ def Installer_With_Pip():
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pythonnet-2.4.1.dev0-cp38-cp38-win32.whl",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pywin32-225-cp38-cp38-win32.whl"
                        ]
-    pip_module_win_only = ["wmi", "pyautoit", "pywinauto", "winshell"]
+    pip_module_win_only = ["wmi", "pyautoit", "winshell"]
 
     for each in pip_module_list:
         try:
