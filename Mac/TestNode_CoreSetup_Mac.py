@@ -19,13 +19,13 @@ install_str_pip = "pip3 install -U"
 install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
-pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "imutils", "simplejson", "urllib3", "selenium",
-                   "python-dateutil", "beautifulsoup4",
-                   "requests", "wheel", "python3-xlib", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
-                   "xlrd","tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts", "datefinder", "regex","pyttsx3",
+pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "simplejson", "urllib3", "selenium",
+                   "python-dateutil", 
+                   "requests", "wheel", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
+                "tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts", "datefinder", "regex","pyttsx3","pyaudio"
                    "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip"]
 pip_only_mac = ["appscript"]
-brew_module_list = ["wget", "wxmac", 'geckodriver']
+brew_module_list = ["wget", "wxmac", 'geckodriver',"portaudio"]
 
 def check_if_ran_with_sudo():
     global sudo_pass
