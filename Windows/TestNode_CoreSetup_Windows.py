@@ -112,7 +112,7 @@ def Installer_With_Pip():
                        "SpeechRecognition","colorama",
                        "python-dateutil", "Appium-Python-Client", "futures", "xlwings", "image", "tzlocal", "pyautocad",
                        "PyPDF2",
-                       "pyshortcuts", "datefinder", "regex","pyttsx3",
+                       "pyshortcuts", "datefinder", "regex","pyttsx3==2.71",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/PyAudio-0.2.11-cp38-cp38-win32.whl",
                        "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/psutil-5.6.3-cp38-cp38-win32.whl",

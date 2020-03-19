@@ -110,7 +110,7 @@ def Installer_With_Pip():
     pip_module_list = [
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/greenlet-0.4.15-cp38-cp38-win32.whl",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/gevent-1.5a2-cp38-cp38-win32.whl",
-                       "locustio", "realbrowserlocusts",
+                       "locustio", "realbrowserlocusts"
                        ]
 
     for each in pip_module_list:
