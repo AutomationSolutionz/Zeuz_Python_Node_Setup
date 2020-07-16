@@ -20,12 +20,13 @@ install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "simplejson", "urllib3", "selenium",
-                   "python-dateutil", 
+                   "python-dateutil",  "pyodbc", "webdrivermanager",
                    "requests", "wheel", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
-                "tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts", "datefinder", "regex","pyttsx3","pyaudio"
+                   "tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts", "datefinder", "regex","pyttsx3","pyaudio",
+                   "imutils", "scikit-image", "opencv-python", "opencv-contrib-python",
                    "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip"]
 pip_only_mac = ["appscript"]
-brew_module_list = ["wget", "wxmac", 'geckodriver',"portaudio"]
+brew_module_list = ["wget", "wxmac", "geckodriver", "portaudio"]
 
 def check_if_ran_with_sudo():
     global sudo_pass
@@ -44,7 +45,7 @@ def check_if_ran_with_sudo():
             command = "echo 'sudo check'"
             p = os.system('echo "%s"|sudo -S %s' % (passwd, command)) # Issue: if shell has sudo permissions already, but user starts script without sudo, this will pass with the wrong password, because sudo won't ask for it
             if p == 256:
-                print("You didnt enter the correct sudo password.  Chances left: %s"%(max_try-counter-1))
+                print("You didn't enter the correct sudo password.  Chances left: %s"%(max_try-counter-1))
                 counter = counter+1
             else:
                 print("sudo authentication verified!")
@@ -172,7 +173,7 @@ def Install_Brew():
     # brew Need to implement if brew is already implemented
     try:
         sys.stdout.write("Installing: Brew\n", True)
-        brew_string = 'echo "%s" | /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"' % sudo_pass
+        brew_string = 'echo "%s" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"' % sudo_pass
         print(os.system(brew_string))
         print("Successfully installed brew")
     except:

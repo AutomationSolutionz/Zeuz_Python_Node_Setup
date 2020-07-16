@@ -109,9 +109,9 @@ def Installer_With_Pip():
 
     pip_module_list = ["pip", "clint", "pillow", "setuptools", "pyserial", "numpy", "simplejson", "urllib3",
                        "selenium", "uiautomator", "requests", "wheel", "pyautogui", "lxml",
-                       "SpeechRecognition","colorama",
+                       "SpeechRecognition","colorama", "pyodbc",
                        "python-dateutil", "Appium-Python-Client", "futures", "xlwings", "image", "tzlocal", "pyautocad",
-                       "PyPDF2",
+                       "PyPDF2", "webdrivermanager",
                        "pyshortcuts", "datefinder", "regex","pyttsx3==2.71",
                        "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/PyAudio-0.2.11-cp38-cp38-win32.whl",
                        "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip",

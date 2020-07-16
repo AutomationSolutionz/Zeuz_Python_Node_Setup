@@ -8,8 +8,6 @@ import subprocess
 
 install_str = "pip3 install -U"
 
-
-
 # Installation function
 def install(type = "", module_name = "", module_version = None, cmd = ""):
     command = ""
@@ -26,32 +24,43 @@ def install(type = "", module_name = "", module_version = None, cmd = ""):
     print(output)
     print((78 * '-'))
 
-def Installer_With_Pip():
-    # install pip
-    try:
-        install(cmd="sudo easy_install pip")
-    except:
-        print("Unable to install pip")
-        
-    
+
 def basic_installation():
-    #brew
-    try:
-        install(cmd='/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-    except:
-        print("Unable to install brew")
-        
     #node
     try:
         install(cmd="brew install node")
     except:
         print("Unable to install node")
-        
-    #appium
+
+    # Install java
+    try:
+        install(cmd="brew cask install adoptopenjdk")
+    except:
+        print("Unable to install adoptopenjdk (Java)")
+    
+    # Set JAVA_HOME variable
+    try:
+        print("Setting JAVA_HOME for Bash (~/.bashrc)")
+        output = os.system('echo "export JAVA_HOME=`/usr/libexec/java_home`" >> ~/.bashrc')
+        print(output)
+
+        print("Setting JAVA_HOME for ZSH (~/.zshrc)")
+        output = os.system('echo "export JAVA_HOME=`/usr/libexec/java_home`" >> ~/.zshrc')
+        print(output)
+    except:
+        print("Unable to set JAVA_HOME variable. You may not be able to run Android automation if this is not set properly")
+
+    # ADB for android
+    try:
+        install(cmd="brew cask install android-platform-tools")
+    except:
+        print("Unable to install adb. Zeuz Node will be unable to detect devices if adb is not working.")
+    
     try:
         install(cmd="npm install -g appium@1.4.16")
     except:
         print("Unable to install appium")
+
 
 class Logger(object):
     def __init__(self):
@@ -65,16 +74,9 @@ class Logger(object):
     def close(self):
         self.log.close()
 
+
 def main():
     sys.stdout = Logger()
-
-## Install PIP
-    print((78 * '-'))
-    print ('Python PIP Installation')
-    print((78 * '-'))
-
-## Install PIP modules    
-    # Installer_With_Pip()
 
     basic_installation()
 
@@ -82,3 +84,4 @@ def main():
 
 if __name__=="__main__":
     main()
+

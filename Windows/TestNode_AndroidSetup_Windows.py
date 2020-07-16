@@ -137,11 +137,6 @@ def Get_Home_Dir():
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail, True)
         return False
 
-
-
-
-
-
 def Download_File(base_url, file_name,md5=False):
     try:
 
@@ -150,17 +145,12 @@ def Download_File(base_url, file_name,md5=False):
 
         file_url = base_url + file_name
         download_path =  Get_Home_Dir()+os.sep + 'Downloads' + os.sep +  file_name
-        
-        download_path_complete = CommonUtils.Download_File(file_url, download_path)
-
-        
         '''
         some times files gets corrpt and we need to re-download
         if os.path.isfile(download_path):
             #print "already downloading... skipping download"
             sys.stdout.write("already downloading... skipping download", True)
             return download_path
-        '''
         '''
         r = requests.get(file_url, stream=True)
         path = download_path
@@ -171,11 +161,8 @@ def Download_File(base_url, file_name,md5=False):
                     f.write(chunk)
                     f.flush()
         f.close()
-        
-        '''
         sys.stdout.write("Download completed", True)
-        return download_path_complete
-    
+        return download_path
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()        
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

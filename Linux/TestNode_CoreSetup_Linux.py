@@ -17,11 +17,11 @@ logfile = "TestNode_Core_Logs.log"
 
 # Libraries and modules to be installed
 apt_get_module_list = ["python3-pip", "python3-tk", "python3-setuptools", "libxss1", "libappindicator1",
-                       "libindicator7" , "python3-gi", "curl","python3-pyaudio"]
+                       "libindicator7" , "python3-gi", "curl","python3-pyaudio", "unixodbc", "unixodbc-dev"]
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "python-dateutil", "numpy", "urllib3", "selenium",
-                   "uiautomator", "requests", "wheel","colorama",
+                   "uiautomator", "requests", "wheel","colorama", "pyodbc",
                    "pyautogui", "Appium-Python-Client", "lxml", "pyscreenshot", "futures", "image",
-                   "tzlocal", "pyautocad", "PyPDF2",
+                   "tzlocal", "pyautocad", "PyPDF2", "webdrivermanager",
                    "pyshortcuts", "datefinder", "regex","pyttsx3"]
 
 # Commands that help with installation

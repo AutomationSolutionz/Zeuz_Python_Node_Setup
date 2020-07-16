@@ -11,6 +11,10 @@ install_str = "pip3 install -U"
 sudo_pass = ''
 logfile = "TestNode_iOS_Logs.log"
 
+# Create log file if it doesn't exist already
+if not os.path.exists(logfile):
+    with open(logfile, 'w'): pass
+
 try:
     import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
 except:

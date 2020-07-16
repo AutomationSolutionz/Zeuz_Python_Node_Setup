@@ -371,8 +371,8 @@ class Application(tk.Frame):
             time.sleep(1) # Allow enough time for read_log() to detect the module is finished and exit (prevent concurrent after()'s)
             self.module = installer.replace('.py', '') # Create module name from filename
             module = importlib.import_module(self.module) # Import module (path set above)
-            if sys.platform == 'win32': module.main(True) # Execute installer in GUI mode (Permissions already elevated)
-            else: module.main(self.password.get()) # Execute installer in GUI mode and send root password
+            if sys.platform == 'win32': module.main() # Execute installer in GUI mode (Permissions already elevated)
+            else: module.main() # Execute installer in GUI mode and send root password
             q.put('----------------------------------------\n%s - End\n----------------------------------------\n\n' % installer)
             time.sleep(1) # Allow enough time for read_log() to read off the last log lines
 
