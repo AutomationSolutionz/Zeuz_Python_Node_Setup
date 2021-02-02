@@ -68,6 +68,61 @@ def install(type="", module_name="", module_version=None, cmd=""):
     print(output)
     print((78 * '-'))
 
+
+try:
+    from subprocess import DEVNULL  # py3k
+except ImportError:
+    import os
+
+    DEVNULL = open(os.devnull, 'wb')
+
+
+def install_missing_modules():
+    """
+    Purpose: This function will check all the installed modules, compare with what is in requirements-win.txt file
+    If anything is missing from requirements-win.txt file, it will install them only
+    """
+    try:
+        req_file_name = "startup_requirements.txt"
+        req_file_path = os.path.dirname(os.path.abspath(__file__)) + os.sep + req_file_name
+        req_list = list()
+        with open(req_file_path) as fd:
+            for i in fd.read().splitlines():
+                if not i.startswith("http"):
+                    req_list.append(i.split("==")[0])
+
+        # get all the modules installed from freeze
+        try:
+            from pip._internal.operations import freeze
+        except ImportError:
+            # pip < 10.0
+            from pip.operations import freeze
+
+        freeze_list = freeze.freeze()
+        alredy_installed_list = []
+        for p in freeze_list:
+            name = p.split("==")[0]
+            if "@" not in name:
+                # '@' symbol appears in some python modules in Windows
+                alredy_installed_list.append(str(name).lower())
+
+        # installing any missing modules
+        installed = False
+        for module_name in req_list:
+            if module_name.lower() not in alredy_installed_list:
+                try:
+                    print("module_installer: Installing module: %s" % module_name)
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", module_name], stderr=DEVNULL,
+                                          stdout=DEVNULL, )
+                    print("module_installer: Installed missing module: %s" % module_name)
+                    installed = True
+                except:
+                    print("module_installer: Failed to install module: %s" % module_name)
+
+    except Exception as e:
+        print("Import Exception : {}".format(e))
+
+
 def get_required_mods():
     print("Tkinter is not installed. This is required to start the graphical interface. I'll try to install it, but you may need to do this manualy. Please enter the root password if asked.\n")
     
@@ -150,6 +205,7 @@ import os, os.path, _thread, sys, time, glob, _thread, subprocess, importlib, qu
 
 # Have user install Tk if this fails
 try:
+    install_missing_modules()
     import requests
     from PIL import Image, ImageTk
     import tkinter as tk
