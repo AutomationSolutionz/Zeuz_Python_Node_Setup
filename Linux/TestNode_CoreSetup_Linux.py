@@ -200,7 +200,7 @@ def Install_Easy_Installer():
         for each in items_to_install:
             try:
                 sys.stdout.write("Installing: %s\n" % each, True)
-                cmd = "easy_install %s" % each  # !!! Not working. Not sure why - repository exists
+                cmd = "pip install %s" % each  # !!! Not working. Not sure why - repository exists
                 output = os.system(cmd)
                 print(output)
                 print((78 * '-'))

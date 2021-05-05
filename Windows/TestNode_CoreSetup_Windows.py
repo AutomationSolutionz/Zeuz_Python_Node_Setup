@@ -160,7 +160,7 @@ def Installer_With_Easy_Install():
     for each in list_of_exe_link:
         try:
             sys.stdout.write("Installing: %s\n" % each.split('/')[-1], True)  # Print to terminal window, and log file
-            easy_install = "easy_install " + each
+            easy_install = "pip install " + each
             install(cmd=easy_install)
         except Exception as e:
             print("{} Exception :{}".format(each, e))
@@ -376,9 +376,9 @@ def Check_Pre_Req(gui):
         sys.stdout.error(
             "Python must be 32 bit. Some modules which are used require 32bit Python. Please uninstall 64bit Python, and install the 32bit Python, and try again.")
         return False
-    if 'setuptools' not in cmdline("easy_install --version"):
-        sys.stdout.error("'easy_install' is not installed and is required")
-        return False
+    # if 'setuptools' not in cmdline("easy_install --version"):
+    #     sys.stdout.error("'easy_install' is not installed and is required")
+    #     return False
     if 'pip' not in cmdline("pip --version"):
         sys.stdout.error(
             "pip is not installed, or not in your PATH variable. It should be located in a sub-directory of the Python directory called 'Scripts'")

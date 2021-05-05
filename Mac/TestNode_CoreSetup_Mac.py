@@ -16,7 +16,7 @@ sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
 install_str_pip = "pip3 install -U"
-install_str_easy_install = "easy_install "
+install_str_easy_install = "pip install "
 brew_str = "/usr/local/bin/brew install"
 
 pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "simplejson", "urllib3", "selenium",
