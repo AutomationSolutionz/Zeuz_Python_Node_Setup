@@ -163,7 +163,7 @@ def get_required_mods():
             else:
                 print("Error - Need root privleges\n")
                 quit()
-            print("Asche")
+
             install(type="sudo", cmd="easy_install pip")
 
             install(type="pip", module_name="--upgrade pip")
