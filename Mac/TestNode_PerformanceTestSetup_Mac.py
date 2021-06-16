@@ -16,7 +16,7 @@ sudo_pass = ''
 logfile = "TestNode_PerformanceTest_Logs.log"
 
 install_str_pip = "pip3 install -U"
-install_str_easy_install = "pip install "
+install_str_easy_install = "easy_install "
 brew_str = "/usr/local/bin/brew install"
 
 pip_module_list = ["wheel", "locustio", "realbrowserlocusts"]
@@ -58,12 +58,12 @@ def check_if_ran_with_sudo():
 def install(type="", module_name="", module_version=None, cmd=""):
     command = ""
 
-    # if type == "easy_install":
-    #     command = 'echo "%s" | %s %s' % (sudo_pass, install_str_easy_install, module_name)
-    #     if module_version:
-    #         command = "%s==%s" % (command, module_version)
+    if type == "easy_install":
+        command = 'echo "%s" | %s %s' % (sudo_pass, install_str_easy_install, module_name)
+        if module_version:
+            command = "%s==%s" % (command, module_version)
 
-    if type == "pip":
+    elif type == "pip":
         command = '%s %s' % (install_str_pip, module_name)
         if module_version:
             command = "%s==%s" % (command, module_version)

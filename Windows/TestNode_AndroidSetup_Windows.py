@@ -389,9 +389,9 @@ def Check_Pre_Req():
     if platform.architecture()[0] != '32bit':
         sys.stdout.error("32bit Python v3.8 must be installed\n",True) # Print to terminal window, and log file
         return False
-    # if 'setuptools' not in cmdline("easy_install --version"):
-    #     sys.stdout.error("'easy_install' is not installed or not in the PATH.\n",True) # Print to terminal window, and log file
-    #     return False
+    if 'setuptools' not in cmdline("easy_install --version"):
+        sys.stdout.error("'easy_install' is not installed or not in the PATH.\n",True) # Print to terminal window, and log file
+        return False
     if 'pip' not in cmdline("pip --version"):
         sys.stdout.error("pip is not installed, or not in your PATH variable.\n",True) # Print to terminal window, and log file
         return False

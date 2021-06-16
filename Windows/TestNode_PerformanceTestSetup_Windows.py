@@ -177,9 +177,9 @@ def Check_Pre_Req(gui):
         sys.stdout.error(
             "Python must be 32 bit. Some modules which are used require 32bit Python. Please uninstall 64bit Python, and install the 32bit Python, and try again.")
         return False
-    # if 'setuptools' not in cmdline("easy_install --version"):
-    #     sys.stdout.error("'easy_install' is not installed and is required")
-    #     return False
+    if 'setuptools' not in cmdline("easy_install --version"):
+        sys.stdout.error("'easy_install' is not installed and is required")
+        return False
     if 'pip' not in cmdline("pip --version"):
         sys.stdout.error(
             "pip is not installed, or not in your PATH variable. It should be located in a sub-directory of the Python directory called 'Scripts'")
