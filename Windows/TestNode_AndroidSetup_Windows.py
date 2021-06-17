@@ -64,7 +64,7 @@ installer_jdk_file_part_1  = "jdk-8u231-windows-x64.sfx.part1.exe"
 installer_jdk_file_part_2  = "jdk-8u231-windows-x64.sfx.part2.rar"
 installer_jdk_file_part_3  = "jdk-8u231-windows-x64.sfx.part3.rar"
 installer_jdk_file_name = r"jdk-8u231-windows-x64.exe"
-install_node_file = 'node-v10.15.3-x64.msi'
+install_node_file = 'node-v14.17.1-x64.msi'
 
 
  
@@ -139,8 +139,6 @@ def Get_Home_Dir():
 
 def Download_File(base_url, file_name,md5=False):
     try:
-
-        
         sys.stdout.write("Downloading from: %s\n"%(base_url+file_name), True)
 
         file_url = base_url + file_name
@@ -389,9 +387,9 @@ def Check_Pre_Req():
     if platform.architecture()[0] != '32bit':
         sys.stdout.error("32bit Python v3.8 must be installed\n",True) # Print to terminal window, and log file
         return False
-    if 'setuptools' not in cmdline("easy_install --version"):
-        sys.stdout.error("'easy_install' is not installed or not in the PATH.\n",True) # Print to terminal window, and log file
-        return False
+    # if 'setuptools' not in cmdline("easy_install --version"):
+    #     sys.stdout.error("'easy_install' is not installed or not in the PATH.\n",True) # Print to terminal window, and log file
+    #     return False
     if 'pip' not in cmdline("pip --version"):
         sys.stdout.error("pip is not installed, or not in your PATH variable.\n",True) # Print to terminal window, and log file
         return False
@@ -707,26 +705,28 @@ def Upgrade_Android_SDK():
 
 def Install_NodeJS(upgrade=False):
     try:
-        print("Installing NodeJS ...and other pre-req")
-        #VisualcppBuildTools()
-        #VisualCpythonCompiler()
-        base_url = "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/"
-        installer_path  = Download_File(base_url, install_node_file)
-        print("Installing NodeJS silently from: %s"%installer_path)
+        # delete npm folder because it causes problem if exists before installing nodejs
+        npm_Path = os.path.join(os.getenv('APPDATA'), "npm")
+        if os.path.exists(npm_Path):
+            sys.stdout.write("Removing npm folder %s\n" % npm_Path, True)
+            shutil.rmtree(npm_Path)
+
+        sys.stdout.write("Installing NodeJS ...and other pre-req\n", True)
+        base_url = "https://nodejs.org/dist/v14.17.1/"
+        installer_path = Download_File(base_url, install_node_file)
+        sys.stdout.write("Installing NodeJS silently from: %s\n"%installer_path, True)
         command = 'msiexec.exe /i "%s"  /passive' %(installer_path)
         os.system(command)
-        print("Adding npm to the path")
-        Add_To_Path("PATH",npm_path)
-        print("Cleaning up...")
-        time.sleep(2)
-        print(os.remove(installer_path))
-        print("adding NPM to python current path")
-        os.environ['PATH'] += ';'+npm_path
-        #os.system('%s config set python python2.7'%npm_path)
-        #os.system('% config set msvs_version 2015'%npm_path)
+        sys.stdout.write("Adding nodejs to the path\n", True)
+        Add_To_Path("PATH", npm_path)
+        sys.stdout.write("Cleaning up nodejs installation file %s\n" % installer_path, True)
+        # time.sleep(2)
+        os.remove(installer_path)
+        sys.stdout.write("adding NPM to python current path\n", True)
+        os.environ['PATH'] += ';' + npm_path
         return True
     except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()        
+        exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
         print(Error_Detail)
@@ -836,7 +836,7 @@ def Check_If_Appium_Installed():
         print(Error_Detail)
         sys.stdout.error("\tAn error occurred. See log for more details: %s\n"%Error_Detail,True)
         return False
- 
+
 
 def Create_UI_Automator_Shortcut():
     try:
@@ -877,9 +877,6 @@ def Create_Android_UI_Inspector_Shortcut():
         return False
 
 
-
-
-
 def main(rungui = False):
 
 
@@ -898,7 +895,7 @@ def main(rungui = False):
     if Check_Pre_Req():
 
         sys.stdout.write("\n 1. Please note that if you have duplicate JDK or newer than 1.8 JAVA Appium will not work.\n",True)
-        sys.stdout.write("\n 2. You must be logged in as Admin.  If you run as admin, appium installer will NOT WORK.\n",True)
+        sys.stdout.write("\n 2. You must be logged in as Admin.  If you don't run as admin, appium installer will NOT WORK.\n",True)
         sys.stdout.write("\n 3. If you have spaces in your user name, Appium will not work.  Create new user with admin permission with no spaces.\n",True)
         sys.stdout.write("\n 4. Make sure you uninstall all other Java versions and remove any java version from Environmental Variable.\n",True)   
         sys.stdout.write("\n 5. We will download a known JDK version (JDK 1.8) that is compatible and install it for you.\n",True)  
@@ -924,12 +921,9 @@ def main(rungui = False):
             sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai",True)
             return False
         else:
-             #create a shortcut ui automator 
-            
+             #create a shortcut ui automator
             try:
-                
-                
-                sys.stdout.write("\n Creating short cut for android UIAutomatorViewer",True)
+                sys.stdout.write("\nCreating short cut for android UIAutomatorViewer",True)
                 from pyshortcuts import make_shortcut
                 import winshell
                 from win32com.client import Dispatch
@@ -946,9 +940,7 @@ def main(rungui = False):
                 shortcut.WorkingDirectory = startin
                 shortcut.IconLocation = UiAutomator_Icon_Path
                 shortcut.save()
-                sys.stdout.write("\n Successfully created short cut for android UIAutomatorViewer",True)
-    
- 
+                sys.stdout.write("\nSuccessfully created short cut for android UIAutomatorViewer\n",True)
 
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()        
@@ -956,18 +948,12 @@ def main(rungui = False):
                 Error_Detail = ((str(exc_type).replace("type ", "Error Type: ")) + ";" +  "Error Message: " + str(exc_obj) +";" + "File Name: " + fname + ";" + "Line: "+ str(exc_tb.tb_lineno))
                 sys.stdout.error("\tUnable to create short cut for UI AUtomator: %s\n"%Error_Detail,True)
 
-
-         
-
-        
-
         Appium_Install_Result = Install_Appium()
         if Appium_Install_Result == False:
             sys.stdout.error("\nWe were unable to install Appium.",True)
             sys.stdout.error("\n 1. Make sure you do not have duplicate java installer.  Appium works only with JDK 1.8",True)
             sys.stdout.write("\n If you still have issues with installer, please contact help@zeuz.ai",True)
-            return False            
-        
+            return False
 
     # Clean up logger, and reinstate STDOUT/ERR
     else:

@@ -105,21 +105,17 @@ def install(type="", module_name="", module_version=None, cmd=""):
 
 
 def Installer_With_Pip():
-    # upgrade pip itself
+    # Download requirements-win.txt from ZeuZ_Node repository and install all the modules required
+    url = "https://raw.githubusercontent.com/AutomationSolutionz/Zeuz_Python_Node/" + CommonUtils.Node_branch + "/requirements-win.txt"
+    pip_module_list = []
+    for i in requests.get(url).text.split("\n"):
+        if not i.startswith("http") and i != "":
+            pip_module_list.append(i.split("==")[0].strip())
 
-    pip_module_list = ["pip", "clint", "pillow", "setuptools", "pyserial", "numpy", "simplejson", "urllib3",
-                       "selenium", "uiautomator", "requests", "wheel", "pyautogui", "lxml",
-                       "SpeechRecognition","colorama", "pyodbc",
-                       "python-dateutil", "Appium-Python-Client", "futures", "xlwings", "image", "tzlocal", "pyautocad",
-                       "PyPDF2", "webdrivermanager",
-                       "pyshortcuts", "datefinder", "regex","pyttsx3==2.71",
-                       "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/PyAudio-0.2.11-cp38-cp38-win32.whl",
-                       "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip",
-                       "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/psutil-5.6.3-cp38-cp38-win32.whl",
-                       "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pythonnet-2.4.1.dev0-cp38-cp38-win32.whl",
-                       "https://github.com/AutomationSolutionz/InstallerHelperFiles/raw/master/Windows/pywin32-225-cp38-cp38-win32.whl"
-                       ]
     pip_module_win_only = ["wmi", "pyautoit", "winshell"]
+    for each in pip_module_win_only:    # pip_module_list = pip_module_list - pip_module_win_only
+        if each in pip_module_list:
+            pip_module_list.remove(each)
 
     for each in pip_module_list:
         try:
@@ -131,6 +127,7 @@ def Installer_With_Pip():
             print("{} Exception :{}".format(each, e))
             sys.stdout.error("\tAn error occurred. See log for more details.\n")
 
+    sys.stdout.write("Installing: %s without reloading\n" % str(pip_module_win_only), True)
     for each in pip_module_win_only:
         try:
             sys.stdout.write("Installing: %s\n" % each, True)  # Print to terminal window, and log file
@@ -376,9 +373,10 @@ def Check_Pre_Req(gui):
         sys.stdout.error(
             "Python must be 32 bit. Some modules which are used require 32bit Python. Please uninstall 64bit Python, and install the 32bit Python, and try again.")
         return False
-    if 'setuptools' not in cmdline("easy_install --version"):
-        sys.stdout.error("'easy_install' is not installed and is required")
-        return False
+    """Setup tools or easy_install is deprecated. it does not work anymore"""
+    # if 'setuptools' not in cmdline("easy_install --version"):
+    #     sys.stdout.error("'easy_install' is not installed and is required")
+    #     return False
     if 'pip' not in cmdline("pip --version"):
         sys.stdout.error(
             "pip is not installed, or not in your PATH variable. It should be located in a sub-directory of the Python directory called 'Scripts'")
@@ -414,7 +412,7 @@ def download_dlls_for_windows_automation_and_extract():
         CommonUtils.unzip(zip_file_destination, r'%s\DLLs' % python_dir)
         sys.stdout.write("DLL files extracted successfully\n", True)
         src_file = r'%s\DLLs\win_dll' % python_dir
-        dst_file =  (r'%s\DLLs' % python_dir) 
+        dst_file = (r'%s\DLLs' % python_dir)
         move_all_files_from_folder(src_file, dst_file)
     except Exception as e:
         print("Dll Exception: ", e)
@@ -450,6 +448,7 @@ def main(rungui=False):
 
     # Install
     if Check_Pre_Req(rungui):
+        """Setup tools or easy_install is deprecated. it does not work anymore"""
         # Installer_With_Easy_Install()
         Installer_With_Pip()
         # Installer_With_MSI()
