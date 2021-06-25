@@ -14,7 +14,7 @@ import getpass # For check_if_ran_with_sudo()
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
 from Crossplatform import CommonUtils
 
-apt_get_module_list = ["python3-pip", "build-essential", "python3-setuptools", "curl", "libcurl4-openssl-dev", "libexpat-dev", "libncurses-dev", "zlib1g-dev",
+apt_get_module_list = ["python3-pip", "build-essential", "curl", "libcurl4-openssl-dev", "libexpat-dev", "libncurses-dev", "zlib1g-dev",
                        "openjdk-8-jdk", "openjdk-8-jre", "libc6:i386", "libstdc++6:i386", "zlib1g:i386", "libconfig-dev", "g++-multilib", "gcc-multilib",
                        ]
 #"git", "m4", "texinfo", "libbz2-dev", "make", "cmake", "scons", "autoconf", "automake", "autoconf-archive", "libtool", "flex", "bison",  ]
