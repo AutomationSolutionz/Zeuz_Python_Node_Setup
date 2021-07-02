@@ -15,6 +15,7 @@ gui_prints_position = 0
 # Commands that help with installation
 install_str = "pip install -U pip"
 apt_get_str = "apt-get -y install"
+Node_branch = "beta"  # Todo: When we have a proper release procedure of node then change it to release branch
 
 # Installation function
 def install(type = "", module_name = "", module_version = None, cmd = ""):

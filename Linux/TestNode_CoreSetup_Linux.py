@@ -5,6 +5,7 @@
 
 import subprocess, re, os, sys  # These modules should be available on every platform
 import getpass  # For check_if_ran_with_sudo()
+import requests
 
 # Import local modules
 sys.path.append(
@@ -16,13 +17,15 @@ sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
 # Libraries and modules to be installed
-apt_get_module_list = ["python3-pip", "python3-tk", "python3-setuptools", "libxss1", "libappindicator1",
+apt_get_module_list = ["python3-pip", "python3-tk", "libxss1", "libappindicator1",
                        "libindicator7" , "python3-gi", "curl","python3-pyaudio", "unixodbc", "unixodbc-dev"]
-pip_module_list = ["pip", "psutil", "pillow", "pyserial", "python-dateutil", "numpy", "urllib3", "selenium",
-                   "uiautomator", "requests", "wheel","colorama", "pyodbc",
-                   "pyautogui", "Appium-Python-Client", "lxml", "pyscreenshot", "futures", "image",
-                   "tzlocal", "pyautocad", "PyPDF2", "webdrivermanager",
-                   "pyshortcuts", "datefinder", "regex","pyttsx3"]
+
+# Download requirements-win.txt from ZeuZ_Node repository and install all the modules required
+url = "https://raw.githubusercontent.com/AutomationSolutionz/Zeuz_Python_Node/" + CommonUtils.Node_branch + "/requirements-linux.txt"
+pip_module_list = []
+for i in requests.get(url).text.split("\n"):
+    if not i.startswith("http") and i != "":
+        pip_module_list.append(i.split("==")[0].strip())
 
 # Commands that help with installation
 install_str = "pip3 install -U"
@@ -82,7 +85,6 @@ def Installer_With_Pip():
 
 
 def Install_Chrome_Drivers():
-    import requests
 
     print((78 * '-'))
     sys.stdout.write("Installing: Chrome libraries\n", True)  # Print to terminal window, and log file
@@ -150,7 +152,6 @@ def Install_Chrome_Drivers():
 
 
 def Install_Firefox_Drivers():
-    import requests # Here because it needs to be imported after we install it
 
     # Cleanup any outstanding package issues
     try:
@@ -294,7 +295,8 @@ def main(rungui=False):
     # Perform installation
     OS_Version()
     Installer_With_Apt_get()
-    Install_Easy_Installer()
+    """Setup tools or easy_install is deprecated. it does not work anymore"""
+    # Install_Easy_Installer()
     Installer_With_Pip()
     Install_Chrome_Drivers()
     Install_Firefox_Drivers()

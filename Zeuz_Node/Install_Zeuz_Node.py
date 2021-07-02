@@ -11,7 +11,7 @@ except Exception as e:
     import subprocess # Try to import again
 
 
-node_sw_url = 'https://github.com/AutomationSolutionz/Zeuz_Python_Node/archive/master.zip' # URL pointing to Zeuz Node
+node_sw_url = 'https://github.com/AutomationSolutionz/Zeuz_Python_Node/archive/' + CommonUtils.Node_branch + '.zip' # URL pointing to Zeuz Node
 chunk_size = 4096
 logfile = 'Install_Zeuz_Node_Logs.log'
 
@@ -80,25 +80,25 @@ def move_zeuznode():
             Node_file_cli = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node" + os.sep + "node_cli.py"
             target_gui = Node_file_gui
             target_cli = Node_file_cli
-            
-            
+            Startin_node = str(os.path.join(homedir, 'Desktop')) + os.sep + "ZeuZ_Node"
+
             current_script_path = '%s'%(sys.path[0])
             ZeuZ_Icon_Path = (current_script_path.split('Zeuz_Node')[0])+os.sep+"images"+os.sep+"zeuz.ico"
             if sys.platform == 'win32':
-                create_shortcuts(shortcut_name="Zeuz Node GUI",target_exe_path=target_gui,startin=None,icon_path=ZeuZ_Icon_Path)
-                create_shortcuts(shortcut_name="Zeuz Node CLI",target_exe_path=target_cli,startin=None,icon_path=ZeuZ_Icon_Path)
+                if os.path.exists(target_gui):
+                    create_shortcuts(shortcut_name="Zeuz_Node_GUI",target_exe_path=target_gui,startin=Startin_node,icon_path=ZeuZ_Icon_Path)
+                if os.path.exists(target_cli):
+                    create_shortcuts(shortcut_name="Zeuz_Node_CLI",target_exe_path=target_cli,startin=Startin_node,icon_path=ZeuZ_Icon_Path)
             
             else:
-                make_shortcut(target_gui, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
-                make_shortcut(target_cli, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
-
+                if os.path.exists(target_gui):
+                    make_shortcut(target_gui, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
+                if os.path.exists(target_cli):
+                    make_shortcut(target_cli, name='ZeuZ_Node',icon=ZeuZ_Icon_Path)
 
         except Exception as e:
             print("Shortcut Exception: ", e)
             sys.stdout.error("\n Unable to create ZeuZ Short Cut\n")
-            
-        
-        
         
         return True
     except Exception as e:
@@ -115,7 +115,7 @@ def prints(msg):
     sys.stdout.write(msg, True) # Write all information to gui/terminal window
     
 def install_all():
-    filename = file_downloader(node_sw_url, 'master.zip')
+    filename = file_downloader(node_sw_url, 'beta.zip')
     if filename == False: return False
     if unzip_pkg(filename) == False: return False
     if move_zeuznode() == False: return False
