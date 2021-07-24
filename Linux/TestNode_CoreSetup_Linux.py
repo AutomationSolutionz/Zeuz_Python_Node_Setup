@@ -17,8 +17,8 @@ sudo_pass = ''
 logfile = "TestNode_Core_Logs.log"
 
 # Libraries and modules to be installed
-apt_get_module_list = ["python3-pip", "python3-tk", "libxss1", "libappindicator1",
-                       "libindicator7" , "python3-gi", "curl","python3-pyaudio", "unixodbc", "unixodbc-dev"]
+apt_get_module_list = ["python3-pip", "python3-tk", "libxss1", "libappindicator1", "scrot"
+                       "libindicator7", "python3-gi", "curl", "python3-pyaudio", "unixodbc", "unixodbc-dev"]
 
 # Download requirements-win.txt from ZeuZ_Node repository and install all the modules required
 url = "https://raw.githubusercontent.com/AutomationSolutionz/Zeuz_Python_Node/" + CommonUtils.Node_branch + "/requirements-linux.txt"
