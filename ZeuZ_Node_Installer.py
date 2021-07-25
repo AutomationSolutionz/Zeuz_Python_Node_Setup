@@ -83,7 +83,7 @@ def install_missing_modules():
     If anything is missing from requirements-win.txt file, it will install them only
     """
     try:
-        req_file_name = "startup_requirements.txt"
+        req_file_name = 'installation_files' + os.sep + "startup_requirements.txt"
         req_file_path = os.path.dirname(os.path.abspath(__file__)) + os.sep + req_file_name
         req_list = list()
         with open(req_file_path) as fd:
@@ -219,7 +219,7 @@ import tkinter.messagebox
 need_to_download = False
 sys.path.append(os.path.dirname(os.path.realpath(__file__))) # Set the path, so the can find the modules
 CommonUtils = None
-try: from Crossplatform import CommonUtils
+try: from installation_files.Crossplatform import CommonUtils
 except: need_to_download = True
 
 gui_title = 'Zeuz Node Installer'
@@ -297,15 +297,15 @@ class Application(tk.Frame):
         # Add images for operating systems
         self.img_mac = tk.Label(self.imgframe)
         self.img_mac.grid(row = 0, column = 0)
-        self.display_image(self.img_mac, 'images' + os.sep + 'Apple.png')
+        self.display_image(self.img_mac, 'installation_files' + os.sep + 'images' + os.sep + 'Apple.png')
         
         self.img_win = tk.Label(self.imgframe)
         self.img_win.grid(row = 0, column = 1)
-        self.display_image(self.img_win, 'images' + os.sep + 'Windows.png')
+        self.display_image(self.img_win, 'installation_files' + os.sep + 'images' + os.sep + 'Windows.png')
         
         self.img_lin = tk.Label(self.imgframe)
         self.img_lin.grid(row = 0, column = 2)
-        self.display_image(self.img_lin, 'images' + os.sep + 'Linux.png')
+        self.display_image(self.img_lin, 'installation_files' + os.sep + 'images' + os.sep + 'Linux.png')
         
         # Put highlight around image for current OS
         #!!! Doesn't work on windows, doesn't look good when run as a standalone with no images
@@ -380,13 +380,13 @@ class Application(tk.Frame):
         try:
             # Read installer scripts for this OS, and place in a dictionary
             self.filelist = {}
-            self.filelist = self.get_installer_scripts('Zeuz_Node') # Get Crossplatform scripts - needed for zeuz node sw
+            self.filelist = self.get_installer_scripts('installation_files' + os.sep + 'Zeuz_Node') # Get Crossplatform scripts - needed for zeuz node sw
             if sys.platform == 'win32':
-                self.filelist.update(self.get_installer_scripts('Windows'))
+                self.filelist.update(self.get_installer_scripts('installation_files' + os.sep + 'Windows'))
             elif sys.platform in ['linux2','linux']:
-                self.filelist.update(self.get_installer_scripts('Linux'))
+                self.filelist.update(self.get_installer_scripts('installation_files' + os.sep + 'Linux'))
             elif sys.platform == 'darwin':
-                self.filelist.update(self.get_installer_scripts('Mac'))
+                self.filelist.update(self.get_installer_scripts('installation_files' + os.sep + 'Mac'))
             else: self.log.insert('end', "Error: could not detect platform. Windows, Mac, and Linux are supported.")
             sys.path.append(installer_location) # Set the path, so the can find the modules
             
@@ -624,7 +624,7 @@ class Application(tk.Frame):
                     q.put('Installer files downloaded. You may now start installing.\n')
                     install_complete_check = True # Shutdown read_log(), and put display button
                     sys.path.append(installer_location)
-                    try: from Crossplatform import CommonUtils # Try to import again, in case it failed the first time
+                    try: from installation_files.Crossplatform import CommonUtils # Try to import again, in case it failed the first time
                     except Exception as e:
                         print("Platform Exception : ", e)
                         q.put('Installer files downloaded and unzipped, but something is wrong. You will need to download the entire installer package manually.\n')
