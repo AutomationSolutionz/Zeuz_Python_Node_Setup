@@ -366,7 +366,9 @@ class Application(tk.Frame):
         install_button_row = 5
 
         tk.Label(self.installerframe, text="Performance Testing:").grid(row=4, column=0, sticky='w')
-        tk.Checkbutton(self.installerframe, variable=self.performance).grid(row=4, column=1, sticky='w')
+        perf = tk.Checkbutton(self.installerframe, variable=self.performance)
+        perf.grid(row=4, column=1, sticky='w')
+        perf.configure(state='disabled')
 
         self.install_button = tk.Button(self.installerframe, text = "Install", width = self.button_width, command = self.run_installer)
         self.install_button.grid(row = install_button_row, column = 0, columnspan = 2)
