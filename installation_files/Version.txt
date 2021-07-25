@@ -1,16 +1,6 @@
 [Python Setup]
-version = 5.5
+version = 5.6
 [Release Date]
-date= 26 July, 2021
+date= 27 July, 2021
 [Release Note]
-Note =
-1. Removed easy_insall
-2. connect pip install with requirements.txt of latest beta
-3. download latest beta Node
-4. download nodejs 14
-5. Removed npm folder before installing nodejs
-6. psutil, pywin32, ida, pythonnet fixed
-7. Removed node_gui shortcut
-8. Fixed node_cli shortcut bug
-9. Opencv added
-10. disabled performance setup button
+Note = all the files are put into 'installtion_files' folder and a Read_before_installation.txt is added
