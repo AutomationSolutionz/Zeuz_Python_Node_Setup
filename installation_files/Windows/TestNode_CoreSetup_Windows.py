@@ -74,10 +74,10 @@ except:
 # Import local modules
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))  # Set the path, so the can find the modules
-from Crossplatform import CommonUtils
+from installation_files.Crossplatform import CommonUtils
 
 install_str = "python -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -U"
-logfile = "TestNode_Core_Logs.log"
+logfile = 'installation_files' + os.sep + "TestNode_Core_Logs.log"
 
 
 def cmdline(command):

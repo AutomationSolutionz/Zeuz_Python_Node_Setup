@@ -21,7 +21,7 @@ import winreg as winreg
 
 # Import local modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
-from Crossplatform import CommonUtils
+from installation_files.Crossplatform import CommonUtils
 import webbrowser
 import winshell
 from win32com.client import Dispatch
@@ -56,7 +56,7 @@ Android_Platform_Tools_Dir = Android_Home_Dir + os.sep + "platform-tools"
 # - not needed anymore with new android Android_Build_Tools_Dir = Android_Home_Dir + os.sep + "build-tools"
 Downloaded_Path = expanduser("~")+os.sep + "Downloads" 
 Temp_Tools_Dir = expanduser("~")+os.sep + "Downloads" + os.sep + "tools"
-logfile = "TestNode_Android_Logs.log"
+logfile = 'installation_files' + os.sep + "TestNode_Android_Logs.log"
 
 current_script_path = '%s'%(sys.path[0])
 #Updated Oct 26, 2019

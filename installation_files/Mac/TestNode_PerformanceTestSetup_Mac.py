@@ -7,7 +7,7 @@ import getpass
 # Import local modules
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))  # Set the path, so the can find the modules
-from Crossplatform import CommonUtils
+from installation_files.Crossplatform import CommonUtils
 
 # Commands that help with installation
 

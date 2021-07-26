@@ -1,0 +1,6 @@
+[Python Setup]
+version = 5.6
+[Release Date]
+date= 27 July, 2021
+[Release Note]
+Note = all the files are put into 'installtion_files' folder and a Read_before_installation.txt is added

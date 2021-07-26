@@ -28,7 +28,7 @@ else
   esac
 
   source "$VENV_DIR/bin/activate"
-  pip install -r startup_requirements.txt
+  pip install -r installation_files/startup_requirements.txt
 
 fi
 python ZeuZ_Node_Installer.py

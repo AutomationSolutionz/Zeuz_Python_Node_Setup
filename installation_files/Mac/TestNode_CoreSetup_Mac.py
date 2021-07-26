@@ -6,14 +6,14 @@ import getpass
 
 # Import local modules
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) # Set the path, so the can find the modules
-from Crossplatform import CommonUtils
+from installation_files.Crossplatform import CommonUtils
 
 
 # Commands that help with installation
 
 
 sudo_pass = ''
-logfile = "TestNode_Core_Logs.log"
+logfile = 'installation_files' + os.sep + "TestNode_Core_Logs.log"
 
 install_str_pip = "pip3 install -U"
 install_str_easy_install = "easy_install "

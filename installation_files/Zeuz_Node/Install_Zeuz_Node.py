@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Function: Download and installs Zeuz Node software
 import os, os.path, glob, sys, shutil
-from Crossplatform import CommonUtils
+from installation_files.Crossplatform import CommonUtils
 
 try: import subprocess  # We need commands to do anything, so if it's not installed, use subprocess to install it first
 except Exception as e:
@@ -13,7 +13,7 @@ except Exception as e:
 
 node_sw_url = 'https://github.com/AutomationSolutionz/Zeuz_Python_Node/archive/' + CommonUtils.Node_branch + '.zip' # URL pointing to Zeuz Node
 chunk_size = 4096
-logfile = 'Install_Zeuz_Node_Logs.log'
+logfile = 'installation_files' + os.sep + 'Install_Zeuz_Node_Logs.log'
 
 # Tmp directory
 if sys.platform == 'win32': tmp_dir = os.getenv('TMP')

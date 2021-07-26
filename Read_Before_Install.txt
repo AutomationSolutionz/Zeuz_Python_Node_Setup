@@ -1,0 +1,5 @@
+Steps:
+1. Run ZeuZ_Node_Installer
+2. Give sudo pass for linux and mac when asked
+3. Check 'Core Setup', 'Android setup' and 'Install Zeuz Node'. In Mac also check 'IOS Setup'
+4. Click on the 'Install' button

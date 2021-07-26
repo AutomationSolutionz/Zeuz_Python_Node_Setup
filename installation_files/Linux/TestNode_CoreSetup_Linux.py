@@ -10,11 +10,11 @@ import requests
 # Import local modules
 sys.path.append(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))  # Set the path, so the can find the modules
-from Crossplatform import CommonUtils
+from installation_files.Crossplatform import CommonUtils
 
 # Global variables
 sudo_pass = ''
-logfile = "TestNode_Core_Logs.log"
+logfile = 'installation_files' + os.sep + "TestNode_Core_Logs.log"
 
 # Libraries and modules to be installed
 apt_get_module_list = ["python3-pip", "python3-tk", "libxss1", "libappindicator1", "scrot"
