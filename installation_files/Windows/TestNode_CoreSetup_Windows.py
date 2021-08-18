@@ -453,7 +453,7 @@ def main(rungui=False):
         Installer_With_Pip()
         # Installer_With_MSI()
         Selenium_Driver_Files_Windows()
-        download_dlls_for_windows_automation_and_extract()
+        # download_dlls_for_windows_automation_and_extract()
         
         post_win32api()
         
