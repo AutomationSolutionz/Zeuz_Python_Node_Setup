@@ -23,7 +23,7 @@ pip_module_list = ["pip", "psutil", "pillow", "pyserial", "colorama", "numpy", "
                    "python-dateutil",  "pyodbc", "webdrivermanager",
                    "requests", "wheel", "pyautogui", "Appium-Python-Client","uiautomator", "lxml",
                    "tzlocal","futures","xlwings","image", "tzlocal","pyautocad", "PyPDF2", "pyshortcuts", "datefinder", "regex","pyttsx3","pyaudio",
-                   "imutils", "scikit-image", "opencv-python", "opencv-contrib-python",
+                   "imutils",
                    "https://github.com/AutomationSolutionz/PyGetWindow-0.0.5/archive/master.zip"]
 pip_only_mac = ["appscript"]
 brew_module_list = ["wget", "wxmac", "geckodriver", "portaudio"]
